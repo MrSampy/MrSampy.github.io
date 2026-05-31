@@ -1,6 +1,6 @@
 const DATA = {
   personal: {
-    name: "Serhiy Kolosov",
+    name: "Serhii Kolosov",
     greeting: "Hi, I'm",
     titles: [".NET Developer", "Full Stack Developer", "Software Engineer"],
     about: `As a .NET developer, I possess a proven track record of delivering high-quality software solutions. My expertise lies in developing scalable, reliable, and secure web applications using ASP.NET, C#, SQL Server, and other Microsoft technologies.\n\nI have excellent communication skills and a collaborative approach to working with cross-functional teams. Originally from Ukraine, currently based in Norway, working in an international environment.`,
