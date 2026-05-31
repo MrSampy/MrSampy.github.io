@@ -21,18 +21,32 @@
 
 /* ─── Reset ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 16px; background: var(--bg-primary); }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  background: var(--bg-primary);
+  overflow-x: hidden;            /* prevent horizontal scroll on all devices */
+  -webkit-text-size-adjust: 100%;/* prevent iOS font-size inflation on rotate */
+}
 body {
   background: transparent;
   color: var(--text-primary);
   font-family: var(--font-body);
   line-height: 1.7;
   overflow-x: hidden;
+  overflow-wrap: break-word;     /* wrap long words / emails everywhere */
+  word-break: break-word;
+  -webkit-tap-highlight-color: transparent; /* remove blue flash on tap */
 }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; }
 img { display: block; max-width: 100%; }
-button { cursor: pointer; font-family: inherit; }
+button {
+  cursor: pointer;
+  font-family: inherit;
+  touch-action: manipulation;    /* prevent 300ms tap delay */
+}
+a { touch-action: manipulation; }
 
 /* ─── Custom scrollbar ───────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
@@ -868,54 +882,143 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+/* Tablet ─────────────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .skills-grid { grid-template-columns: repeat(2, 1fr); }
-  .lang-grid { grid-template-columns: repeat(2, 1fr); }
-  .projects-grid { grid-template-columns: repeat(2, 1fr); }
-  .about-grid { grid-template-columns: 1fr; }
+  .skills-grid    { grid-template-columns: repeat(2, 1fr); }
+  .lang-grid      { grid-template-columns: repeat(2, 1fr); }
+  .projects-grid  { grid-template-columns: repeat(2, 1fr); }
+  .about-grid     { grid-template-columns: 1fr; }
   .about-image-wrap { display: flex; justify-content: center; }
   .about-img-ring { width: 220px; height: 220px; }
 }
 
+/* Mobile ─────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .section { padding: 4rem 0; }
+  /* Layout */
+  .section   { padding: 3.5rem 0; }
+  .container { padding: 0 1.25rem; }
+
+  /* Navbar */
   .nav-links {
     display: none;
     position: absolute;
     top: 100%; left: 0; right: 0;
-    background: rgba(10, 10, 15, 0.97);
-    backdrop-filter: blur(20px);
+    background: rgba(10, 10, 15, 0.98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     flex-direction: column;
-    padding: 1rem 2rem 2rem;
-    gap: 0.25rem;
+    padding: 0.5rem 1.25rem 1.5rem;
+    gap: 0;
     border-bottom: 1px solid var(--border);
+    /* safe area for notched phones */
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
   }
   .nav-links.open { display: flex; }
+  .nav-link {
+    padding: 0.75rem 0.5rem;   /* bigger tap targets */
+    font-size: 1rem;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+  }
+  .nav-link:last-child { border-bottom: none; }
   .nav-links .btn-outline { display: none; }
-  .navbar .btn-outline { display: inline-flex; }
+  .navbar .btn-outline    { display: inline-flex; margin-left: auto; margin-right: 0.5rem; }
   .hamburger { display: flex; }
-  .navbar .btn-outline { margin-left: auto; margin-right: 0.5rem; }
 
-  .hero-content { flex-direction: column-reverse; text-align: center; padding-top: 6rem; }
-  .hero-description { margin-left: auto; margin-right: auto; }
-  .hero-actions { justify-content: center; }
-  .hero-avatar-wrap { margin-bottom: 1rem; }
-  .avatar-ring { width: 200px; height: 200px; }
+  /* Hero */
+  .hero-content {
+    flex-direction: column-reverse;
+    text-align: center;
+    padding-top: 5.5rem;
+    gap: 1.5rem;
+  }
+  .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.97rem;
+  }
+  .hero-actions  { justify-content: center; }
+  .hero-avatar-wrap { margin-bottom: 0; }
+  .avatar-ring   { width: 185px; height: 185px; }
+  .avatar-badge  { font-size: 0.7rem; padding: 5px 10px; }
 
-  .about-grid { grid-template-columns: 1fr; }
+  /* About */
+  .about-grid       { grid-template-columns: 1fr; }
   .about-image-wrap { order: -1; display: flex; justify-content: center; }
+  .about-img-ring   { width: 180px; height: 180px; border-radius: 50%; }
+  .about-img        { border-radius: 50%; }
 
+  /* Skills / Languages */
   .skills-grid { grid-template-columns: 1fr; }
-  .lang-grid { grid-template-columns: repeat(2, 1fr); }
-  .projects-grid { grid-template-columns: 1fr; }
-  .edu-grid { grid-template-columns: 1fr; }
-  .contact-grid { grid-template-columns: 1fr; }
+  .lang-grid   { grid-template-columns: repeat(2, 1fr); }
 
+  /* Timeline — make tap targets bigger */
+  .tl-header   { padding: 1rem 1.25rem; min-height: 72px; align-items: flex-start; }
+  .timeline    { padding-left: 2rem; }
+
+  /* Projects */
+  .projects-grid { grid-template-columns: 1fr; }
+  .project-thumb { height: 110px; }
+
+  /* Education */
+  .edu-grid { grid-template-columns: 1fr; }
+
+  /* Contact — fix long email overflow */
+  .contact-grid  { grid-template-columns: 1fr; }
+  .cli-value     { overflow-wrap: break-word; word-break: break-all; font-size: 0.88rem; }
+  .contact-link-item { padding: 0.85rem 1rem; }
+
+  /* Forms — 16px prevents iOS auto-zoom on focus */
+  .form-group input,
+  .form-group textarea {
+    font-size: 16px;
+  }
+
+  /* Footer safe area */
+  .footer {
+    padding-bottom: max(2.5rem, calc(1.5rem + env(safe-area-inset-bottom)));
+  }
+
+  /* Hide expensive cursor overlay */
   .cursor, .cursor-follower { display: none; }
 }
 
+/* Small phones ───────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .hero-name { font-size: 2.4rem; }
-  .hero-actions { flex-direction: column; align-items: center; }
-  .hero-actions .btn { width: 100%; justify-content: center; }
+  .section   { padding: 3rem 0; }
+  .container { padding: 0 1rem; }
+
+  /* Hero */
+  .hero-name   { font-size: 2.2rem; }
+  .hero-role   { font-size: 0.95rem; justify-content: center; }
+  .hero-actions { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .hero-actions .btn { width: 100%; justify-content: center; padding: 0.85rem 1rem; }
+  .avatar-ring { width: 160px; height: 160px; }
+
+  /* Section headings */
+  .section-title { font-size: 1.7rem; }
+
+  /* Skills — very narrow, wrap tags smaller */
+  .tag { font-size: 0.7rem; padding: 2px 8px; }
+  .skill-card { padding: 1.25rem; }
+
+  /* Languages — stack on very small screens */
+  .lang-grid { grid-template-columns: 1fr; }
+  .lang-card { padding: 0.85rem 1rem; }
+
+  /* Timeline */
+  .tl-role    { font-size: 0.97rem; }
+  .tl-period  { font-size: 0.73rem; }
+  .tl-body li { font-size: 0.88rem; }
+
+  /* Education */
+  .edu-card   { padding: 1.25rem 1.5rem; }
+  .edu-degree { font-size: 0.97rem; }
+
+  /* Contact */
+  .contact-form { gap: 1rem; }
+
+  /* Navbar CV button smaller */
+  .btn-outline.btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
 }
