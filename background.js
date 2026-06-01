@@ -54,12 +54,12 @@
     const l1Geo = new THREE.BufferGeometry();
     l1Geo.setAttribute('position', l1Attr);
     const l1Pts  = new THREE.Points(l1Geo,
-      new THREE.PointsMaterial({ color: 0x6366f1, size: 0.025, transparent: true, opacity: 0.8 }));
+      new THREE.PointsMaterial({ color: 0xc5f135, size: 0.025, transparent: true, opacity: 0.75 }));
 
     const l1GlowGeo = new THREE.BufferGeometry();
     l1GlowGeo.setAttribute('position', l1Attr);
     const l1Glow = new THREE.Points(l1GlowGeo,
-      new THREE.PointsMaterial({ color: 0x6366f1, size: 0.05, transparent: true, opacity: 0.05 }));
+      new THREE.PointsMaterial({ color: 0xc5f135, size: 0.05, transparent: true, opacity: 0.04 }));
 
     const l2 = makeLayer(L2, 0.0009);
     const l2Attr = new THREE.BufferAttribute(l2.pos, 3).setUsage(THREE.DynamicDrawUsage);
@@ -67,12 +67,12 @@
     const l2Geo = new THREE.BufferGeometry();
     l2Geo.setAttribute('position', l2Attr);
     const l2Pts  = new THREE.Points(l2Geo,
-      new THREE.PointsMaterial({ color: 0x06b6d4, size: 0.015, transparent: true, opacity: 0.8 }));
+      new THREE.PointsMaterial({ color: 0xa8d922, size: 0.015, transparent: true, opacity: 0.6 }));
 
     const l2GlowGeo = new THREE.BufferGeometry();
     l2GlowGeo.setAttribute('position', l2Attr);
     const l2Glow = new THREE.Points(l2GlowGeo,
-      new THREE.PointsMaterial({ color: 0x06b6d4, size: 0.03, transparent: true, opacity: 0.05 }));
+      new THREE.PointsMaterial({ color: 0xa8d922, size: 0.03, transparent: true, opacity: 0.04 }));
 
     const MAX_LINES   = 300;
     const MAX_DIST    = 1.8;
@@ -156,7 +156,7 @@
       }
     }
 
-    const CR = 0x06 / 255, CG = 0xb6 / 255, CB = 0xd4 / 255;
+    const CR = 0xc5 / 255, CG = 0xf1 / 255, CB = 0x35 / 255;
 
     function updateLines() {
       let li = 0;
