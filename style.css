@@ -423,6 +423,9 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
+/* Mobile-only overlay — hidden on desktop */
+.nav-overlay { display: none; }
+
 /* ─── Hero ───────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
@@ -799,17 +802,33 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
   border-radius: var(--r-sm);
   padding: 2px 7px;
 }
+.lang-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .lang-bar-track {
-  height: 3px;
-  background: var(--line-1);
+  flex: 1;
+  height: 6px;
+  background: var(--bg-3);
   border-radius: var(--r-pill);
   overflow: hidden;
 }
 .lang-bar-fill {
   height: 100%;
+  width: 0%;
   background: linear-gradient(90deg, var(--accent), var(--blue));
   border-radius: var(--r-pill);
-  transition: width 1s ease;
+  box-shadow: 0 0 10px rgba(52, 225, 242, 0.45);
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lang-pct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  flex-shrink: 0;
+  width: 34px;
+  text-align: right;
 }
 
 /* ─── Experience / Timeline ──────────────────────────────────────────────── */
@@ -1143,35 +1162,47 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
   .lang-grid       { grid-template-columns: repeat(2, 1fr); }
   .projects-grid   { grid-template-columns: repeat(2, 1fr); }
   .about-grid      { grid-template-columns: 1fr; }
-  .about-image-wrap { position: static; order: -1; display: flex; flex-direction: column; align-items: flex-start; }
-  .about-img-ring  { width: 200px; height: 200px; }
-  .about-stat-card { max-width: 400px; }
+  .about-image-wrap { position: static; order: -1; display: flex; flex-direction: column; align-items: center; }
+  .about-img-ring  { width: 200px; height: 200px; margin-bottom: 1rem; }
+  .about-stat-card { max-width: 400px; width: 100%; }
 }
 
 @media (max-width: 768px) {
   .section   { padding: 56px 0; }
   .container { padding: 0 20px; }
 
-  /* Navbar — pill shrinks on mobile */
-  .nav-container { padding: 0 16px; }
+  /* Navbar — mobile */
+  .nav-container { padding: 0 16px; position: relative; z-index: 99; }
   .nav-pill { padding: 8px 10px 8px 16px; gap: 8px; }
-  .nav-links {
+  /* Hide desktop nav-links on mobile (shown via overlay instead) */
+  .nav-links { display: none !important; }
+  /* Full-screen overlay — lives outside nav-pill so position:fixed works */
+  .nav-overlay {
     display: none;
-    position: absolute;
-    top: calc(100% + 8px); left: 0; right: 0;
-    background: rgba(10, 14, 21, 0.96);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    list-style: none;
+    margin: 0; padding: 0;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(6, 8, 13, 0.97);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     flex-direction: column;
-    padding: 12px 16px max(20px, env(safe-area-inset-bottom));
-    gap: 2px;
-    border: 1px solid var(--line-2);
-    border-radius: var(--r-lg);
-    box-shadow: var(--shadow-3);
-    z-index: 90;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 98;
   }
-  .nav-links.open { display: flex; }
-  .nav-link { padding: 10px 12px; font-size: 0.95rem; border-radius: var(--r-md); }
+  .nav-overlay.open { display: flex; }
+  .nav-overlay .nav-link {
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    width: 260px;
+    text-align: center;
+    border-radius: var(--r-md);
+    border: 1px solid var(--line-2);
+    display: block;
+  }
+  .nav-overlay .nav-link:hover { background: var(--bg-2); border-color: var(--accent-line); color: var(--accent); }
   .hamburger { display: flex; }
   .nav-cta { display: none; }
 
@@ -1189,10 +1220,10 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
 
   /* About */
   .about-grid { grid-template-columns: 1fr; }
-  .about-image-wrap { order: -1; }
-  .about-img-ring { width: 160px; height: 160px; border-radius: 50%; }
+  .about-image-wrap { order: -1; align-items: center; }
+  .about-img-ring { width: 160px; height: 160px; border-radius: 50%; margin-bottom: 1rem; }
   .about-img { border-radius: 50%; }
-  .about-stat-card { max-width: 100%; }
+  .about-stat-card { max-width: 100%; width: 100%; }
 
   /* Skills */
   .skills-grid { grid-template-columns: 1fr; }

@@ -65,8 +65,12 @@ function renderLanguages() {
         <span class="lang-name">${lang.name}</span>
         <span class="lang-level">${lang.level}</span>
       </div>
-      <div class="lang-bar-track">
-        <div class="lang-bar-fill" style="width:${lang.bar}%"></div>
+      <div class="lang-bar-row">
+        <div class="lang-bar-track">
+          <div class="lang-bar-fill" style="width:0%"
+               data-width="${lang.bar}"></div>
+        </div>
+        <span class="lang-pct">${lang.bar}%</span>
       </div>
     `;
     grid.appendChild(card);
@@ -360,6 +364,19 @@ function initReveal() {
     { threshold: 0.08 }
   );
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Animate language bars when they scroll into view
+  const barIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.lang-bar-fill').forEach(fill => {
+          fill.style.width = fill.dataset.width + '%';
+        });
+        barIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.lang-card').forEach(card => barIO.observe(card));
 }
 
 /* ─── Custom cursor ──────────────────────────────────────────────────────── */
@@ -401,17 +418,19 @@ function initCursor() {
 
 /* ─── Hamburger ──────────────────────────────────────────────────────────── */
 function initHamburger() {
-  const btn   = document.getElementById('hamburger');
-  const links = document.getElementById('navLinks');
+  const btn     = document.getElementById('hamburger');
+  const overlay = document.getElementById('navOverlay');
 
   btn.addEventListener('click', () => {
-    btn.classList.toggle('open');
-    links.classList.toggle('open');
+    const isOpen = btn.classList.toggle('open');
+    overlay.classList.toggle('open', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
   });
-  links.querySelectorAll('a').forEach(a => {
+  overlay.querySelectorAll('a').forEach(a => {
     a.addEventListener('click', () => {
       btn.classList.remove('open');
-      links.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
     });
   });
 }
