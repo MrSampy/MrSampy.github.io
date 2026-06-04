@@ -122,35 +122,14 @@ img { display: block; max-width: 100%; }
 button { cursor: pointer; font-family: inherit; touch-action: manipulation; }
 a { touch-action: manipulation; }
 
-/* ─── Three.js canvas — disable (CSS grid texture is the background) ──── */
-#bg-canvas { display: none; }
 
 /* ─── Custom scrollbar ───────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg-0); }
 ::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: var(--r-pill); }
 
-/* ─── Custom cursor ─────────────────────────────────────────────────────── */
-.cursor {
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  position: fixed; top: 0; left: 0;
-  pointer-events: none; z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: transform var(--dur-fast), opacity 0.3s;
-}
-.cursor-follower {
-  width: 28px; height: 28px;
-  border: 1px solid var(--accent-line);
-  border-radius: 50%;
-  position: fixed; top: 0; left: 0;
-  pointer-events: none; z-index: 9998;
-  transform: translate(-50%, -50%);
-  transition: transform 0.18s ease, width 0.3s, height 0.3s;
-}
-body:not(.cursor-active) .cursor,
-body:not(.cursor-active) .cursor-follower { opacity: 0; }
+/* ─── Custom cursor (disabled) ──────────────────────────────────────────── */
+.cursor, .cursor-follower { display: none; }
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
 .container {
@@ -429,16 +408,13 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
 /* ─── Hero ───────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  background-color: var(--bg-1);
   overflow: hidden;
 }
 .hero-glow {
   position: absolute;
-  top: 60px; left: 6%;
-  width: 540px; height: 540px;
-  background: radial-gradient(circle, rgba(52,225,242,0.09), transparent 65%);
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(30,60,120,0.18) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 0;
 }
 .hero-content {
   display: grid;
@@ -448,6 +424,8 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
   padding-top: 88px;
   padding-bottom: 40px;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 .hero-text { position: relative; z-index: 1; }
 .hero-eyebrow {
@@ -544,13 +522,8 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
   animation: blink 1.05s steps(1) infinite;
 }
 
-/* Scroll hint */
-.scroll-hint {
-  position: absolute;
-  bottom: 2.5rem; left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
-}
+/* Scroll hint — hidden */
+.scroll-hint { display: none; }
 .scroll-line {
   width: 1px; height: 48px;
   background: linear-gradient(to bottom, var(--accent), transparent);
@@ -585,7 +558,17 @@ body:not(.cursor-active) .cursor-follower { opacity: 0; }
   color: var(--fg-2);
   font-size: 0.9rem;
 }
-.fact-icon { font-size: 1rem; }
+.fact-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  flex-shrink: 0;
+  color: var(--accent);
+  background: var(--accent-ghost);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-md);
+}
 
 /* stat rail card */
 .about-image-wrap {

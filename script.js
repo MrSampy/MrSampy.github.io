@@ -381,56 +381,67 @@ function initReveal() {
 
 /* ─── Custom cursor ──────────────────────────────────────────────────────── */
 function initCursor() {
-  const cursor   = document.getElementById('cursor');
-  const follower = document.getElementById('cursorFollower');
-  if (!cursor) return;
+  const dot      = document.getElementById('cursor');
+  const ring     = document.getElementById('cursorFollower');
+  if (!dot || window.matchMedia('(pointer:coarse)').matches) return;
 
   let mx = 0, my = 0, fx = 0, fy = 0;
   document.body.classList.add('cursor-active');
 
+  /* Dot follows instantly */
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top  = my + 'px';
-  });
+    dot.style.left = mx + 'px';
+    dot.style.top  = my + 'px';
+  }, { passive: true });
 
-  (function animFollower() {
-    fx += (mx - fx) * 0.12;
-    fy += (my - fy) * 0.12;
-    follower.style.left = fx + 'px';
-    follower.style.top  = fy + 'px';
-    requestAnimationFrame(animFollower);
+  /* Ring follows with spring lag */
+  (function animRing() {
+    fx += (mx - fx) * 0.10;
+    fy += (my - fy) * 0.10;
+    ring.style.left = fx + 'px';
+    ring.style.top  = fy + 'px';
+    requestAnimationFrame(animRing);
   })();
 
-  document.querySelectorAll('a, button, .tl-header, .project-card, .skill-card').forEach(el => {
+  /* Hover state on interactive elements */
+  const targets = 'a, button, .tl-header, .project-card, .skill-card, .lang-card, .contact-link-item';
+  document.querySelectorAll(targets).forEach(el => {
     el.addEventListener('mouseenter', () => {
-      cursor.style.transform   = 'translate(-50%,-50%) scale(1.8)';
-      follower.style.width     = '44px';
-      follower.style.height    = '44px';
+      dot.classList.add('is-hover');
+      ring.classList.add('is-hover');
     });
     el.addEventListener('mouseleave', () => {
-      cursor.style.transform   = 'translate(-50%,-50%) scale(1)';
-      follower.style.width     = '28px';
-      follower.style.height    = '28px';
+      dot.classList.remove('is-hover');
+      ring.classList.remove('is-hover');
     });
+  });
+
+  /* Hide when leaving window */
+  document.addEventListener('mouseleave', () => {
+    dot.style.opacity  = '0';
+    ring.style.opacity = '0';
+  });
+  document.addEventListener('mouseenter', () => {
+    dot.style.opacity  = '';
+    ring.style.opacity = '';
   });
 }
 
 /* ─── Hamburger ──────────────────────────────────────────────────────────── */
 function initHamburger() {
-  const btn     = document.getElementById('hamburger');
-  const overlay = document.getElementById('navOverlay');
+  const btn   = document.getElementById('hamburger');
+  const links = document.getElementById('navLinks');
+  if (!btn || !links) return;
 
   btn.addEventListener('click', () => {
-    const isOpen = btn.classList.toggle('open');
-    overlay.classList.toggle('open', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
+    btn.classList.toggle('open');
+    links.classList.toggle('open');
   });
-  overlay.querySelectorAll('a').forEach(a => {
+  links.querySelectorAll('a').forEach(a => {
     a.addEventListener('click', () => {
       btn.classList.remove('open');
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
+      links.classList.remove('open');
     });
   });
 }
