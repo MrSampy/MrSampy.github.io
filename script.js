@@ -445,20 +445,35 @@ function initCursor() {
 
 /* ─── Hamburger ──────────────────────────────────────────────────────────── */
 function initHamburger() {
-  const btn   = document.getElementById('hamburger');
-  const links = document.getElementById('navLinks');
-  if (!btn || !links) return;
+  const btn      = document.getElementById('hamburger');
+  const overlay  = document.getElementById('navOverlay');
+  const backdrop = document.getElementById('navBackdrop');
+  if (!btn || !overlay) return;
 
-  btn.addEventListener('click', () => {
-    btn.classList.toggle('open');
-    links.classList.toggle('open');
+  const open = () => {
+    btn.classList.add('open');
+    overlay.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+  };
+  const close = () => {
+    btn.classList.remove('open');
+    overlay.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+  };
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    overlay.classList.contains('open') ? close() : open();
   });
-  links.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      btn.classList.remove('open');
-      links.classList.remove('open');
-    });
-  });
+
+  // Close on any nav link click
+  overlay.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+
+  // Close on backdrop tap
+  if (backdrop) backdrop.addEventListener('click', close);
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
 
 /* ─── Form submit ────────────────────────────────────────────────────────── */
