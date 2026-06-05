@@ -455,7 +455,7 @@ a { touch-action: manipulation; }
   grid-template-columns: 1.2fr 0.8fr;
   gap: 56px;
   align-items: center;
-  padding-top: 88px;
+  padding-top: 108px;
   padding-bottom: 40px;
   min-height: 100vh;
   position: relative;
@@ -1383,7 +1383,7 @@ a { touch-action: manipulation; }
   .hero-content {
     grid-template-columns: 1fr;
     min-height: auto;
-    padding-top: 90px;
+    padding-top: 112px;
     padding-bottom: 48px;
     gap: 28px;
   }
@@ -1426,6 +1426,9 @@ a { touch-action: manipulation; }
 @media (max-width: 480px) {
   .section   { padding: 48px 0; }
   .container { padding: 0 16px; }
+
+  /* Re-assert after .container padding shorthand resets padding-top to 0 */
+  .hero-content { padding-top: 112px; }
 
   .hero-name  { font-size: 2rem; color: var(--fg-1); }
   .hero-role  { font-size: 0.88rem; }
