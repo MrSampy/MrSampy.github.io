@@ -162,33 +162,48 @@ function renderProjects() {
     card.className = 'project-card reveal';
     if (i % 2 === 1) card.classList.add('reveal-delay');
 
-    // derive accent color from gradient start (first color)
+    // Extract first hex color from gradient for accent
     const accentMatch = p.gradient.match(/#[0-9a-fA-F]{6}/);
     const accentColor = accentMatch ? accentMatch[0] : '#34E1F2';
 
+    // Build translucent glow from accent (used in ::after strip)
+    const hex = accentColor.replace('#', '');
+    const r = parseInt(hex.slice(0,2),16);
+    const g = parseInt(hex.slice(2,4),16);
+    const b = parseInt(hex.slice(4,6),16);
+    const paGlow = `rgba(${r},${g},${b},0.10)`;
+
+    card.style.setProperty('--pa', accentColor);
+    card.style.setProperty('--pa-gradient', p.gradient);
+    card.style.setProperty('--pa-glow', paGlow);
+
     const tags  = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
     const ghBtn = p.github
-      ? `<a href="${p.github}" class="btn btn-icon" target="_blank" rel="noopener">GitHub ↗</a>`
+      ? `<a href="${p.github}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">GitHub ↗</a>`
       : '';
     const demoBtn = p.demo
-      ? `<a href="${p.demo}" class="btn btn-icon" target="_blank" rel="noopener">Live ↗</a>`
+      ? `<a href="${p.demo}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">Live ↗</a>`
+      : '';
+    const actions = (ghBtn || demoBtn)
+      ? `<div class="project-actions">${ghBtn}${demoBtn}</div>`
       : '';
 
     card.innerHTML = `
-      <div class="project-num-row">
-        <span class="project-num">0${i + 1}</span>
-        <span class="project-arrow">↗</span>
-      </div>
-      <div class="project-accent-bar" style="background:${accentColor}"></div>
-      <div class="project-thumb" style="background:${p.gradient}">
-        <span>${p.title}</span>
+      <div class="project-header">
+        <div class="project-dots">
+          <span class="project-dot project-dot-r"></span>
+          <span class="project-dot project-dot-y"></span>
+          <span class="project-dot project-dot-g"></span>
+          <span class="project-path">~/projects/0${i + 1}</span>
+        </div>
+        <a class="project-arrow"${p.github ? ` href="${p.github}" target="_blank" rel="noopener"` : ''}>↗</a>
       </div>
       <div class="project-body">
         <div class="project-title">${p.title}</div>
         <div class="project-desc">${p.description}</div>
         <div class="project-tags">${tags}</div>
       </div>
-      <div class="project-actions">${ghBtn}${demoBtn}</div>
+      ${actions}
     `;
     grid.appendChild(card);
   });

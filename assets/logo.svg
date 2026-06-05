@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <defs>
+    <!-- Gradient for border and brackets -->
+    <linearGradient id="lg-border" x1="0" y1="0" x2="200" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#34E1F2"/>
+      <stop offset="100%" stop-color="#3B6CFF"/>
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="lg-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glass top-highlight clip -->
+    <clipPath id="lg-clip">
+      <rect x="1" y="1" width="198" height="58" rx="14"/>
+    </clipPath>
+  </defs>
+
+  <!-- Glow blobs behind brackets (rendered before bg so they bleed through) -->
+  <ellipse cx="26"  cy="30" rx="22" ry="18" fill="#34E1F2" opacity="0.07" filter="url(#lg-glow)"/>
+  <ellipse cx="174" cy="30" rx="22" ry="18" fill="#3B6CFF" opacity="0.07" filter="url(#lg-glow)"/>
+
+  <!-- Dark glass background -->
+  <rect x="1" y="1" width="198" height="58" rx="14" fill="#0A0E15"/>
+
+  <!-- Inner top-highlight (glass sheen) -->
+  <rect clip-path="url(#lg-clip)" x="1" y="1" width="198" height="28"
+        rx="0" fill="white" opacity="0.04"/>
+
+  <!-- Gradient border -->
+  <rect x="0.75" y="0.75" width="198.5" height="58.5" rx="14.25"
+        stroke="url(#lg-border)" stroke-width="1.5"/>
+
+  <!-- Top specular line -->
+  <line x1="28" y1="1.5" x2="172" y2="1.5"
+        stroke="white" stroke-opacity="0.12" stroke-width="1"/>
+
+  <!-- Logo text: <SK/> centered -->
+  <text x="100" y="39"
+        text-anchor="middle"
+        font-family="'JetBrains Mono', 'Fira Code', ui-monospace, monospace"
+        font-size="30" font-weight="700" letter-spacing="-0.5">
+    <tspan fill="#34E1F2">&lt;</tspan>
+    <tspan fill="#E8EEF6">SK</tspan>
+    <tspan fill="#3B6CFF">/&gt;</tspan>
+  </text>
+</svg>

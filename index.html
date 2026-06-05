@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
 
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -24,8 +25,27 @@
     <nav class="navbar" id="navbar">
       <div class="nav-container">
         <div class="nav-pill">
-          <a href="#hero" class="nav-logo">
-            <span class="nav-bracket">&lt;</span>SK<span class="nav-bracket">/&gt;</span>
+          <a href="#hero" class="nav-logo" aria-label="Home — Serhii Kolosov">
+            <svg class="nav-logo-svg" viewBox="0 0 96 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <filter id="nl-glow" x="-80%" y="-80%" width="260%" height="260%">
+                  <feGaussianBlur stdDeviation="3" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <!-- Bracket glows -->
+              <ellipse cx="9"  cy="15" rx="8" ry="8" fill="#34E1F2" opacity="0.08" filter="url(#nl-glow)"/>
+              <ellipse cx="87" cy="15" rx="8" ry="8" fill="#3B6CFF" opacity="0.08" filter="url(#nl-glow)"/>
+              <!-- <SK/> text -->
+              <text x="48" y="21"
+                    text-anchor="middle"
+                    font-family="'JetBrains Mono', ui-monospace, monospace"
+                    font-size="20" font-weight="700" letter-spacing="-0.5">
+                <tspan fill="#34E1F2">&lt;</tspan>
+                <tspan fill="#E8EEF6">SK</tspan>
+                <tspan fill="#3B6CFF">/&gt;</tspan>
+              </text>
+            </svg>
           </a>
           <ul class="nav-links" id="navLinks">
             <li><a href="#about"      class="nav-link"><span class="nav-num">01</span> About</a></li>
@@ -253,9 +273,26 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="container footer-inner">
-        <span class="footer-monogram">
-          <span class="nb">&lt;</span>SK<span class="nb">/&gt;</span>
-        </span>
+        <a href="#hero" aria-label="Back to top" style="line-height:0">
+          <svg viewBox="0 0 96 30" fill="none" xmlns="http://www.w3.org/2000/svg"
+               style="height:28px;width:auto" aria-hidden="true">
+            <defs>
+              <filter id="ft-glow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="3" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <ellipse cx="9"  cy="15" rx="8" ry="8" fill="#34E1F2" opacity="0.07" filter="url(#ft-glow)"/>
+            <ellipse cx="87" cy="15" rx="8" ry="8" fill="#3B6CFF" opacity="0.07" filter="url(#ft-glow)"/>
+            <text x="48" y="21" text-anchor="middle"
+                  font-family="'JetBrains Mono', ui-monospace, monospace"
+                  font-size="20" font-weight="700" letter-spacing="-0.5">
+              <tspan fill="#34E1F2">&lt;</tspan>
+              <tspan fill="#E8EEF6">SK</tspan>
+              <tspan fill="#3B6CFF">/&gt;</tspan>
+            </text>
+          </svg>
+        </a>
         <p class="footer-copy">// © 2026 Serhii Kolosov — Stavanger, Norway</p>
         <p style="color:var(--fg-3);font-size:0.8rem;">
           Designed &amp; built by <span class="accent-text">Serhii Kolosov</span>

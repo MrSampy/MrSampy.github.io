@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="fv-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#34E1F2"/>
+      <stop offset="100%" stop-color="#3B6CFF"/>
+    </linearGradient>
+    <filter id="fv-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="fv-clip"><rect x="1" y="1" width="30" height="30" rx="7"/></clipPath>
+  </defs>
+
+  <!-- Subtle corner glows -->
+  <ellipse cx="6"  cy="16" rx="6" ry="6" fill="#34E1F2" opacity="0.25" filter="url(#fv-glow)"/>
+  <ellipse cx="26" cy="16" rx="6" ry="6" fill="#3B6CFF" opacity="0.25" filter="url(#fv-glow)"/>
+
+  <!-- Background -->
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="#0A0E15"/>
+
+  <!-- Glass top sheen -->
+  <rect clip-path="url(#fv-clip)" x="1" y="1" width="30" height="14" fill="white" opacity="0.06"/>
+
+  <!-- Gradient border -->
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="7.25"
+        stroke="url(#fv-g)" stroke-width="1.5"/>
+
+  <!-- SK text -->
+  <text x="16" y="22"
+        text-anchor="middle"
+        font-family="'JetBrains Mono', ui-monospace, monospace"
+        font-size="13" font-weight="700"
+        fill="#E8EEF6" letter-spacing="-0.5">SK</text>
+
+  <!-- Small cyan dot accent (like a status indicator) -->
+  <circle cx="25" cy="8" r="2.5" fill="#34E1F2" opacity="0.8"/>
+</svg>

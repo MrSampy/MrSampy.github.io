@@ -52,7 +52,7 @@ const DATA = {
 
   languages: [
     { name: "Ukrainian", level: "Native",    bar: 100 },
-    { name: "Russian",   level: "C2",        bar: 95  },
+    { name: "Russian",   level: "Native",    bar: 100 },
     { name: "English",   level: "B2",        bar: 65  },
     { name: "Norwegian", level: "A1",        bar: 15  },
   ],
