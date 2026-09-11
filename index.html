@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caprasimo:wght@400&family=Figtree:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -17,290 +17,147 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- Custom cursor -->
-    <div class="cursor" id="cursor"></div>
-    <div class="cursor-follower" id="cursorFollower"></div>
+    <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-label" id="cursorLabel"></span></div>
 
-    <!-- Navbar -->
-    <nav class="navbar" id="navbar">
-      <div class="nav-container">
-        <div class="nav-pill">
-          <a href="#hero" class="nav-logo" aria-label="Home — Serhii Kolosov">
-            <svg class="nav-logo-svg" viewBox="0 0 96 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <filter id="nl-glow" x="-80%" y="-80%" width="260%" height="260%">
-                  <feGaussianBlur stdDeviation="3" result="b"/>
-                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-              </defs>
-              <!-- Bracket glows -->
-              <ellipse cx="9"  cy="15" rx="8" ry="8" fill="#34E1F2" opacity="0.08" filter="url(#nl-glow)"/>
-              <ellipse cx="87" cy="15" rx="8" ry="8" fill="#3B6CFF" opacity="0.08" filter="url(#nl-glow)"/>
-              <!-- <SK/> text -->
-              <text x="48" y="21"
-                    text-anchor="middle"
-                    font-family="'JetBrains Mono', ui-monospace, monospace"
-                    font-size="20" font-weight="700" letter-spacing="-0.5">
-                <tspan fill="#34E1F2">&lt;</tspan>
-                <tspan fill="#E8EEF6">SK</tspan>
-                <tspan fill="#3B6CFF">/&gt;</tspan>
-              </text>
-            </svg>
-          </a>
-          <ul class="nav-links" id="navLinks">
-            <li><a href="#about"      class="nav-link"><span class="nav-num">01</span> About</a></li>
-            <li><a href="#skills"     class="nav-link"><span class="nav-num">02</span> Skills</a></li>
-            <li><a href="#experience" class="nav-link"><span class="nav-num">03</span> Experience</a></li>
-            <li><a href="#projects"   class="nav-link"><span class="nav-num">04</span> Work</a></li>
-            <li><a href="#education"  class="nav-link"><span class="nav-num">05</span> Education</a></li>
-          </ul>
-          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-            <a href="assets/Resume.pdf" class="btn btn-outline btn-sm" download>CV</a>
-            <a href="#contact" class="nav-cta">Contact</a>
-            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-              <span></span><span></span><span></span>
-            </button>
-          </div>
-        </div>
+    <nav class="nav">
+      <a href="#hero" class="nav-mark" aria-label="Home — Serhii Kolosov">SK</a>
+      <div class="nav-links">
+        <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Toolbox</a>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#work" class="nav-link">Work</a>
+        <a href="#contact" class="btn btn-primary nav-contact">Contact</a>
       </div>
-      <!-- Mobile dropdown popup -->
-      <ul class="nav-overlay" id="navOverlay">
-        <li><a href="#about"      class="nav-link"><span class="nav-num">01</span> About</a></li>
-        <li><a href="#skills"     class="nav-link"><span class="nav-num">02</span> Skills</a></li>
-        <li><a href="#experience" class="nav-link"><span class="nav-num">03</span> Experience</a></li>
-        <li><a href="#projects"   class="nav-link"><span class="nav-num">04</span> Work</a></li>
-        <li><a href="#education"  class="nav-link"><span class="nav-num">05</span> Education</a></li>
-        <li><a href="#contact"    class="nav-link nav-link-contact"><span class="nav-num">06</span> Contact</a></li>
-      </ul>
-      <!-- Backdrop to close menu on outside click -->
-      <div class="nav-backdrop" id="navBackdrop"></div>
     </nav>
 
-    <!-- Hero -->
     <section id="hero" class="hero">
-      <div class="hero-content container">
+      <div class="blob blob-1" aria-hidden="true"><span data-parallax="-40"></span></div>
+      <div class="blob blob-2" aria-hidden="true"><span data-parallax="60"></span></div>
 
-        <!-- Left: text -->
-        <div class="hero-text">
-          <p class="hero-eyebrow">// .net developer &nbsp;·&nbsp; ai engineer</p>
-          <h1 class="hero-name">
-            I build enterprise <span class="accent-word">.NET</span><br/>
-            systems &amp; applied<br/>ML solutions.
-          </h1>
-          <div class="hero-role">
-            <span class="role-prefix">&gt;&nbsp;</span>
-            <span class="typewriter" id="typewriter"></span>
-            <span class="cursor-blink">▍</span>
-          </div>
-          <p class="hero-description">
-            Building scalable, production-grade web applications with C#/.NET
-            and crafting intelligent ML-powered tools — from compliance
-            platforms to RAG systems.
-          </p>
-          <div class="hero-actions">
-            <a href="#projects" class="btn btn-primary">View selected work &nbsp;→</a>
-            <a href="#contact"  class="btn btn-ghost">Get in touch</a>
+      <p class="hero-eyebrow">.NET developer · AI engineer · Stavanger, Norway</p>
+
+      <div class="hero-row hero-row-1">
+        <span class="tilt" data-tilt><span class="hero-word hero-word-ser rise">SER</span></span>
+        <div class="ticker rise">
+          <div class="ticker-track">
+            <span>C# / .NET • Full stack • Applied ML • RAG systems • Compliance platforms • Clean architecture •&nbsp;</span>
+            <span>C# / .NET • Full stack • Applied ML • RAG systems • Compliance platforms • Clean architecture •&nbsp;</span>
           </div>
         </div>
-
-        <!-- Right: terminal -->
-        <div class="hero-terminal">
-          <div class="term">
-            <div class="term-bar">
-              <span class="term-dot" style="background:#FF5C6C"></span>
-              <span class="term-dot" style="background:#F5B53D"></span>
-              <span class="term-dot" style="background:#3FD68B"></span>
-              <span class="term-title">~/serhii — zsh</span>
-            </div>
-            <div class="term-body" id="termBody">
-              <span class="tc">$</span> <span class="term-caret" id="termCaret">▍</span>
-            </div>
-          </div>
-        </div>
-
+        <span class="tilt" data-tilt><span class="hero-word hero-word-hii rise">HII</span></span>
       </div>
-      <a href="#about" class="scroll-hint" aria-label="Scroll down">
-        <div class="scroll-line"></div>
-      </a>
-    </section>
 
-    <!-- About -->
-    <section id="about" class="section about-section">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-label">01 /</span>
-          <h2 class="section-title">About</h2>
-        </div>
-        <div class="about-grid">
-          <div class="about-text reveal">
-            <p id="aboutText" class="about-p"></p>
-            <div class="about-facts">
-              <div class="fact-item">
-                <span class="fact-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-                  </svg>
-                </span>
-                <span>Based in Stavanger, Norway — working internationally</span>
-              </div>
-              <div class="fact-item">
-                <span class="fact-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                  </svg>
-                </span>
-                <span>Full Stack Developer at In-Core</span>
-              </div>
-              <div class="fact-item">
-                <span class="fact-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                  </svg>
-                </span>
-                <span>Software Engineering student at KPI</span>
-              </div>
-              <div class="fact-item">
-                <span class="fact-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/>
-                  </svg>
-                </span>
-                <span>Exploring AI/ML — RAG systems &amp; LLM tooling</span>
-              </div>
-            </div>
-            <div class="about-expectations reveal" id="expectationsBlock">
-              <div class="exp-title">// What I'm looking for</div>
-              <ul class="exp-list" id="expectationsList"></ul>
-            </div>
-          </div>
-          <div class="about-image-wrap reveal reveal-delay">
-            <div class="about-img-ring">
-              <img
-                src="assets/photo_1.png"
-                alt="Serhii Kolosov"
-                class="about-img"
-                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-              />
-              <div class="about-img-fallback">SK</div>
-            </div>
-            <div class="about-stat-card" id="aboutStats"></div>
-          </div>
+      <div class="hero-row hero-row-2">
+        <span class="tilt" data-tilt><span class="hero-word hero-word-kol rise">KOL</span></span>
+        <span class="magnet" data-magnet="0.35">
+          <a href="#contact" class="hero-badge rise" aria-label="Available for work — contact">
+            <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+              <defs><path id="ring" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"></path></defs>
+              <text><textPath href="#ring">OPEN TO WORK • OPEN TO WORK • OPEN TO WORK •</textPath></text>
+            </svg>
+            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M8 7h9v9"></path></svg>
+          </a>
+        </span>
+        <span class="tilt" data-tilt><span class="hero-word hero-word-sov rise">SOV</span></span>
+      </div>
+
+      <div class="hero-foot">
+        <p class="hero-lede rise">I build enterprise .NET systems and applied ML tools — from compliance platforms to RAG pipelines. Production-grade, scalable, and honest about trade-offs.</p>
+        <div class="hero-actions rise">
+          <a href="#work" class="btn btn-primary btn-lg">View selected work</a>
+          <a href="assets/CV.pdf" download class="btn btn-secondary btn-lg">Download CV</a>
         </div>
       </div>
     </section>
 
-    <!-- Skills -->
-    <section id="skills" class="section skills-section">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-label">02 /</span>
-          <h2 class="section-title">Skills &amp; stack</h2>
+    <section id="about" class="section about">
+      <div data-reveal>
+        <p class="kicker">01 /</p>
+        <h2 class="h-display about-h">Ab<span class="o o-accent2 o-grow" aria-hidden="true"><span class="eye" data-eye></span></span>ut<span class="sr-only">o</span></h2>
+        <p class="about-lede">Hello, I'm Serhii. I'm a full stack developer at In-Core, based in Stavanger and working internationally. My design philosophy is clarity — clear domain models, clear APIs, clear trade-offs. Restraint over cleverness.</p>
+        <ul class="dot-list">
+          <li><i class="dot-accent"></i>Full Stack Developer at In-Core</li>
+          <li><i class="dot-accent2"></i>Software Engineering student at KPI</li>
+          <li><i class="dot-neutral"></i>Exploring AI/ML — RAG systems and LLM tooling</li>
+        </ul>
+        <div class="callout">
+          <span class="callout-k">What I'm looking for</span>
+          <span class="callout-t">A product team shipping .NET at scale, where ML is a tool rather than a slogan. Remote or hybrid across Europe.</span>
         </div>
-        <div class="skills-grid" id="skillsGrid"></div>
-        <div class="languages-block reveal" id="languagesBlock">
-          <div class="lang-header">// Human languages</div>
-          <div class="lang-grid" id="langGrid"></div>
+      </div>
+      <div class="portrait" data-reveal>
+        <div class="portrait-blob" aria-hidden="true"></div>
+        <div class="portrait-frame washed">
+          <img src="assets/photo_1.png" alt="Serhii Kolosov" />
+        </div>
+        <span class="portrait-mark">SK</span>
+      </div>
+    </section>
+
+    <section id="skills" class="section toolbox">
+      <p class="kicker" data-reveal>02 /</p>
+      <h2 class="h-display" data-reveal>T<span class="o o-accent" aria-hidden="true"><span class="eye" data-eye></span></span><span class="o o-accent2 o-overlap" aria-hidden="true"><span class="eye" data-eye></span></span>lbox</h2>
+      <div class="skills-grid" id="skillsGrid"></div>
+      <div class="langs" data-reveal>
+        <span class="langs-k">Human languages</span>
+        <span id="langList" class="langs-list"></span>
+      </div>
+    </section>
+
+    <section id="experience" class="section experience">
+      <p class="kicker" data-reveal>03 /</p>
+      <h2 class="h-display h-display-pill" data-reveal><span class="o o-accent o-pill" aria-hidden="true"></span>Experience</h2>
+      <div class="xp-list" id="xpList"></div>
+    </section>
+
+    <section id="work" class="section work">
+      <p class="kicker" data-reveal>04 /</p>
+      <h2 class="h-display" data-reveal>W<span class="o o-accent o-spin" aria-hidden="true"></span>rk</h2>
+      <div class="work-list" id="workList"></div>
+      <div class="preview" id="preview" aria-hidden="true" hidden>
+        <div class="preview-tags" id="previewTags"></div>
+        <p id="previewText"></p>
+        <div class="preview-dots">
+          <span class="dot-accent"></span>
+          <span class="dot-accent2"></span>
+          <span class="dot-text"></span>
         </div>
       </div>
     </section>
 
-    <!-- Experience -->
-    <section id="experience" class="section experience-section">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-label">03 /</span>
-          <h2 class="section-title">Experience</h2>
-        </div>
-        <div class="timeline" id="timeline"></div>
+    <section id="education" class="section education">
+      <div data-reveal>
+        <p class="kicker">05 /</p>
+        <h2 class="h-display">Educati<span class="o o-accent2" aria-hidden="true"><span class="eye" data-eye></span></span>n</h2>
       </div>
+      <div class="edu-list" id="eduList" data-reveal></div>
     </section>
 
-    <!-- Projects -->
-    <section id="projects" class="section projects-section">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-label">04 /</span>
-          <h2 class="section-title">Selected work</h2>
-        </div>
-        <div class="projects-grid" id="projectsGrid"></div>
+    <section id="contact" class="section contact">
+      <div class="contact-blob" aria-hidden="true"></div>
+      <div class="contact-intro" data-reveal>
+        <p class="kicker">06 /</p>
+        <h2 class="h-display">C<span class="o o-accent o-grow" aria-hidden="true"><span class="eye" data-eye></span></span>ntact</h2>
+        <p class="contact-lede">Have a project or an opportunity? I'm open to new conversations.</p>
+        <div class="contact-links" id="contactLinks"></div>
       </div>
+      <form
+        class="contact-form"
+        id="contactForm"
+        action="https://formspree.io/f/xzdwkngy"
+        method="POST"
+        data-reveal
+      >
+        <label>Name<input class="input" name="name" placeholder="Your name" required /></label>
+        <label>Email<input class="input" type="email" name="email" placeholder="you@company.com" required /></label>
+        <label>Message<textarea class="input" name="message" rows="4" placeholder="What are you building?" required></textarea></label>
+        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Send message</button>
+      </form>
     </section>
 
-    <!-- Education -->
-    <section id="education" class="section education-section">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-label">05 /</span>
-          <h2 class="section-title">Education</h2>
-        </div>
-        <div class="edu-grid" id="eduGrid"></div>
-      </div>
-    </section>
-
-    <!-- Contact -->
-    <section id="contact" class="section contact-section">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-label">06 /</span>
-          <h2 class="section-title">Contact</h2>
-          <p class="section-subtitle">
-            Have a project or an opportunity? I'm open to new conversations.
-          </p>
-        </div>
-        <div class="contact-grid">
-          <div class="contact-info reveal" id="contactInfo"></div>
-          <form
-            class="contact-form reveal reveal-delay"
-            id="contactForm"
-            action="https://formspree.io/f/xzdwkngy"
-            method="POST"
-          >
-            <div class="form-group">
-              <label for="cName">Name</label>
-              <input type="text" id="cName" name="name" placeholder="Your name" required />
-            </div>
-            <div class="form-group">
-              <label for="cEmail">Email</label>
-              <input type="email" id="cEmail" name="email" placeholder="you@company.com" required />
-            </div>
-            <div class="form-group">
-              <label for="cMsg">Message</label>
-              <textarea id="cMsg" name="message" rows="5" placeholder="What are you building?" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary btn-full">Send message</button>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="footer">
-      <div class="container footer-inner">
-        <a href="#hero" aria-label="Back to top" style="line-height:0">
-          <svg viewBox="0 0 96 30" fill="none" xmlns="http://www.w3.org/2000/svg"
-               style="height:28px;width:auto" aria-hidden="true">
-            <defs>
-              <filter id="ft-glow" x="-80%" y="-80%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="3" result="b"/>
-                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <ellipse cx="9"  cy="15" rx="8" ry="8" fill="#34E1F2" opacity="0.07" filter="url(#ft-glow)"/>
-            <ellipse cx="87" cy="15" rx="8" ry="8" fill="#3B6CFF" opacity="0.07" filter="url(#ft-glow)"/>
-            <text x="48" y="21" text-anchor="middle"
-                  font-family="'JetBrains Mono', ui-monospace, monospace"
-                  font-size="20" font-weight="700" letter-spacing="-0.5">
-              <tspan fill="#34E1F2">&lt;</tspan>
-              <tspan fill="#E8EEF6">SK</tspan>
-              <tspan fill="#3B6CFF">/&gt;</tspan>
-            </text>
-          </svg>
-        </a>
-        <p class="footer-copy">// © 2026 Serhii Kolosov — Stavanger, Norway</p>
-        <p style="color:var(--fg-3);font-size:0.8rem;">
-          Designed &amp; built by <span class="accent-text">Serhii Kolosov</span>
-        </p>
-      </div>
+      <a href="#hero" class="footer-mark" aria-label="Back to top">SK</a>
+      <span>© 2026 Serhii Kolosov — Stavanger, Norway</span>
     </footer>
 
     <script src="data.js"></script>

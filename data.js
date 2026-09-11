@@ -69,7 +69,10 @@ const DATA = {
       period: "May 2023 — Present",
       role: "Full Stack Developer",
       company: "In-Core",
+      location: "Stavanger, Norway",
       current: true,
+      summary:
+        "Developing scalable ASP.NET Core applications, RESTful APIs and microservices for enterprise clients — from data modelling with SQL Server and Entity Framework to Docker-based CI/CD, in cross-functional international teams.",
       description: [
         "Developing scalable web applications using ASP.NET Core and C#",
         "Building RESTful APIs and microservices architecture",
@@ -82,7 +85,10 @@ const DATA = {
       period: "Jan 2023 — May 2023",
       role: "Lead QA Engineer",
       company: "In-Core",
+      location: "Ukraine · remote",
       current: false,
+      summary:
+        "Led the QA team and defined testing strategy, standards and best practices; built automated test frameworks and deployed a Selenium HUB for parallel cross-browser runs, cutting suite runtime by 6×.",
       description: [
         "Led a QA team responsible for end-to-end product quality assurance",
         "Defined testing strategies, standards, and best practices",
@@ -95,7 +101,10 @@ const DATA = {
       period: "Sep 2022 — Jan 2023",
       role: "Automation QA Engineer",
       company: "In-Core",
+      location: "Ukraine · remote",
       current: false,
+      summary:
+        "Developed unit, integration and end-to-end test suites for web applications and maintained the test infrastructure and reporting pipelines.",
       description: [
         "Developed automated test suites for web applications",
         "Implemented unit, integration, and end-to-end tests",
@@ -106,6 +115,15 @@ const DATA = {
   ],
 
   projects: [
+    {
+      title: "Lexify",
+      description:
+        "A production web app for learning vocabulary in any language. Words are scheduled with a spaced-repetition algorithm so each review lands right before you would forget it, while an AI layer generates example sentences, explanations and quizzes tailored to your level. Progress tracking and daily streaks keep learners consistent over months, not days.",
+      tags: ["AI", "Spaced Repetition", "Web App"],
+      github: null,
+      demo: "https://lexify-app.com/",
+      gradient: "linear-gradient(135deg, #f59e0b, #ef4444)",
+    },
     {
       title: "Pr Reviewr for Azure",
       description:
@@ -123,7 +141,7 @@ const DATA = {
       github: "https://github.com/MrSampy/Platform-for-coordination-of-search-and-rescue-operations",
       demo: null,
       gradient: "linear-gradient(135deg, #0ea5e9, #10b981)",
-    }
+    },
   ],
 
   education: [
