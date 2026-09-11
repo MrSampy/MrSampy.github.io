@@ -129,23 +129,6 @@ textarea.input { min-height: 90px; resize: vertical; }
 .rise { animation: rise .9s var(--ease-out) both; }
 .rise.risen { animation: none; }
 
-/* ─── Cursor ─────────────────────────────────────────────────────────────── */
-.cursor {
-  position: fixed; left: 0; top: 0; z-index: 99; pointer-events: none;
-  width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 999px;
-  background: var(--color-accent); mix-blend-mode: multiply;
-  display: flex; align-items: center; justify-content: center; opacity: 0;
-  transition: width .35s var(--spring), height .35s var(--spring), margin .35s var(--spring), background .3s, opacity .3s;
-  will-change: transform;
-}
-.cursor-label {
-  font-family: var(--font-heading); font-size: 14px; color: var(--color-bg);
-  opacity: 0; transition: opacity .2s; white-space: nowrap;
-}
-.cursor.is-link { width: 48px; height: 48px; margin: -24px 0 0 -24px; background: var(--color-accent-2); }
-.cursor.is-label { width: 84px; height: 84px; margin: -42px 0 0 -42px; background: var(--color-text); }
-.cursor.is-label .cursor-label { opacity: 1; }
-
 /* ─── Nav ────────────────────────────────────────────────────────────────── */
 .nav {
   position: sticky; top: 0; z-index: 20;
@@ -360,6 +343,7 @@ textarea.input { min-height: 90px; resize: vertical; }
 }
 .work-row:hover .work-arrow { background: var(--color-accent); transform: rotate(45deg); }
 .work-end { border-top: 1px solid var(--color-divider); }
+.work-detail { display: none; }
 
 .preview {
   position: absolute; left: 0; top: 0; pointer-events: none; z-index: 5;
@@ -420,6 +404,31 @@ textarea.input { min-height: 90px; resize: vertical; }
 .contact-form .input { border-radius: 999px; padding: 12px 18px; font-size: 15px; }
 .contact-form textarea.input { border-radius: var(--radius-md); resize: vertical; font-family: var(--font-body); }
 .contact-form .btn { justify-self: start; }
+
+/* ─── Touch devices: motion that does not need a pointer ─────────────────── */
+@media (pointer: coarse) {
+  @keyframes bounce { 30% { transform: translateY(-16px) rotate(-3deg); } 100% { transform: none; } }
+  @keyframes eye-blink { 50% { scale: 1 0.1; } }
+  @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(.9); } to { opacity: 1; transform: none; } }
+  @keyframes wink { 45% { transform: rotate(45deg); background: var(--color-accent); } }
+
+  .hero-word:hover { transform: none; color: inherit; }
+  .hero-word.bounce { animation: bounce .6s var(--spring); }
+  .eye { transition: transform .25s ease-out; }
+  .o.blink .eye { animation: eye-blink .22s ease-in-out; }
+  .skill-card .pill { opacity: 0; }
+  .skill-card.in .pill { animation: pop .5s var(--spring) both; animation-delay: calc(var(--i) * 60ms); }
+  .work-row.in .work-arrow { animation: wink 1.3s var(--spring); }
+
+  .work-row.open .work-arrow { background: var(--color-accent); transform: rotate(90deg); animation: none; }
+  .work-detail.open {
+    display: flex; flex-direction: column; gap: var(--space-3);
+    margin: 0 0 var(--space-4); padding: var(--space-4);
+    border-radius: var(--radius-lg); animation: pop .4s var(--spring) both;
+  }
+  .work-detail p { margin: 0; font-size: 15px; line-height: 1.5; }
+  .work-detail .btn { align-self: flex-start; border-radius: 999px; padding: 12px 20px; font-size: 15px; }
+}
 
 /* ─── Footer ─────────────────────────────────────────────────────────────── */
 .footer {

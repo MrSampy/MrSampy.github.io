@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRise();
   initReveal();
   initPointer();
+  initTouchMotion();
   initWorkPreview();
   initForm();
 });
@@ -29,7 +30,7 @@ function esc(s) {
 function renderSkills() {
   const grid = document.getElementById('skillsGrid');
   DATA.skills.forEach((g, i) => {
-    const pills = g.items.map(s => `<span class="pill">${esc(s)}</span>`).join('');
+    const pills = g.items.map((s, j) => `<span class="pill" style="--i:${j}">${esc(s)}</span>`).join('');
     const card = el('div', 'skill-card', `
       <div class="skill-head">
         <h3>${esc(g.label)}</h3>
@@ -85,9 +86,16 @@ function renderProjects() {
     `);
     row.href = href;
     if (href !== '#work') { row.target = '_blank'; row.rel = 'noopener'; }
-    row.setAttribute('data-cursor', 'View');
     row.dataset.index = i;
     list.appendChild(row);
+
+    const detail = el('div', 'work-detail', `
+      <div class="preview-tags">${p.tags.slice(0, 3).map(t => `<span class="preview-tag">${esc(t)}</span>`).join('')}</div>
+      <p>${esc(p.description)}</p>
+      ${href !== '#work' ? `<a class="btn btn-primary" href="${esc(href)}" target="_blank" rel="noopener">${p.github ? 'Open on GitHub' : 'Open live'} ↗</a>` : ''}
+    `);
+    detail.style.background = TINTS[i % TINTS.length];
+    list.appendChild(detail);
   });
   list.appendChild(el('div', 'work-end'));
 }
@@ -139,6 +147,7 @@ function initReveal() {
       if (en.isIntersecting) {
         en.target.style.opacity = '1';
         en.target.style.transform = 'translateY(0)';
+        en.target.classList.add('in');
         io.unobserve(en.target);
       }
     });
@@ -153,30 +162,10 @@ function initReveal() {
 
 function initPointer() {
   if (!window.matchMedia('(pointer: fine)').matches) return;
-  const cur = document.getElementById('cursor');
-  const label = document.getElementById('cursorLabel');
   const hero = document.getElementById('hero');
-  let mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my, seen = false;
-  let hoverKind = null;
+  let mx = innerWidth / 2, my = innerHeight / 2;
 
-  const setCursor = (kind, text) => {
-    if (kind === hoverKind && (!text || text === label.textContent)) return;
-    hoverKind = kind;
-    cur.classList.toggle('is-label', kind === 'label');
-    cur.classList.toggle('is-link', kind === 'link');
-    if (kind === 'label') label.textContent = text;
-  };
-
-  window.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    if (!seen) { seen = true; cx = mx; cy = my; cur.style.opacity = '1'; }
-    const t = e.target.closest ? e.target : null;
-    const lab = t && t.closest('[data-cursor]');
-    if (lab) setCursor('label', lab.getAttribute('data-cursor'));
-    else if (t && t.closest('a, button, input, textarea, [data-eye]')) setCursor('link');
-    else setCursor(null);
-  }, { passive: true });
-  document.documentElement.addEventListener('mouseleave', () => { cur.style.opacity = '0'; });
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
 
   const tilts = [...document.querySelectorAll('[data-tilt]')];
   const magnets = [...document.querySelectorAll('[data-magnet]')];
@@ -184,9 +173,6 @@ function initPointer() {
   const parallax = [...document.querySelectorAll('[data-parallax]')].map(node => ({ el: node.parentElement, k: +node.getAttribute('data-parallax') }));
 
   const loop = () => {
-    cx += (mx - cx) * 0.18; cy += (my - cy) * 0.18;
-    cur.style.transform = `translate(${cx}px, ${cy}px)`;
-
     if (hero.getBoundingClientRect().bottom > 0) {
       const nx = mx / innerWidth - 0.5, ny = my / innerHeight - 0.5;
       parallax.forEach(({ el: node, k }) => { node.style.translate = `${nx * k}px ${ny * k}px`; });
@@ -214,6 +200,80 @@ function initPointer() {
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
+}
+
+function initTouchMotion() {
+  if (window.matchMedia('(pointer: fine)').matches) return;
+
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const eyes = [...document.querySelectorAll('[data-eye]')];
+  const tilts = [...document.querySelectorAll('[data-tilt]')];
+  const parallax = [...document.querySelectorAll('[data-parallax]')].map(node => ({ el: node.parentElement, k: +node.getAttribute('data-parallax') }));
+  const hero = document.getElementById('hero');
+
+  document.querySelectorAll('.hero-word').forEach(word => {
+    word.addEventListener('pointerdown', () => {
+      word.classList.remove('bounce');
+      void word.offsetWidth;
+      word.classList.add('bounce');
+    });
+    word.addEventListener('animationend', e => { if (e.animationName === 'bounce') word.classList.remove('bounce'); });
+  });
+
+  let gx = 0, gy = 0;
+  window.addEventListener('deviceorientation', e => {
+    if (e.gamma == null || e.beta == null) return;
+    gx = clamp(e.gamma / 45, -1, 1);
+    gy = clamp((e.beta - 45) / 45, -1, 1);
+  });
+
+  let vel = 0, last = scrollY;
+  const loop = () => {
+    const t = performance.now() / 1000;
+    vel = vel * 0.85 + (scrollY - last) * 0.15;
+    last = scrollY;
+
+    const lookX = Math.sin(t * 0.7) * 0.12 + Math.sin(t * 1.9) * 0.05 + gx * 0.2;
+    const lookY = clamp(vel / 40, -1, 1) * 0.28 + Math.cos(t * 0.9) * 0.06 + gy * 0.2;
+    eyes.forEach(node => {
+      const r = node.parentElement.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight) return;
+      const m = r.width;
+      node.style.transform = `translate(${clamp(lookX, -0.28, 0.28) * m}px, ${clamp(lookY, -0.28, 0.28) * m}px)`;
+    });
+
+    if (hero.getBoundingClientRect().bottom > 0) {
+      parallax.forEach(({ el: node, k }) => { node.style.translate = `${gx * k * 0.5}px ${scrollY * k * -0.15 + gy * k * 0.5}px`; });
+      tilts.forEach(node => { node.style.transform = `perspective(900px) rotateY(${gx * 14}deg) rotateX(${-gy * 10}deg)`; });
+    }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+
+  const blink = () => {
+    eyes.forEach(node => {
+      const o = node.parentElement;
+      o.classList.add('blink');
+      setTimeout(() => o.classList.remove('blink'), 300);
+    });
+    setTimeout(blink, 2500 + Math.random() * 3000);
+  };
+  setTimeout(blink, 1800);
+
+  const rows = document.querySelectorAll('.work-row');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold: 0.6 });
+  rows.forEach(row => {
+    io.observe(row);
+    row.addEventListener('click', e => {
+      e.preventDefault();
+      const open = !row.classList.contains('open');
+      rows.forEach(r => { r.classList.remove('open'); r.nextElementSibling.classList.remove('open'); });
+      row.classList.toggle('open', open);
+      row.nextElementSibling.classList.toggle('open', open);
+    });
+  });
 }
 
 function initWorkPreview() {
