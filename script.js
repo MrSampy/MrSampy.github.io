@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderEducation();
   renderContactLinks();
   initRise();
+  initVine();
+  initScrollSpy();
   initReveal();
   initPointer();
   initTouchMotion();
@@ -137,6 +139,142 @@ function initRise() {
   document.querySelectorAll('.rise').forEach(node => {
     node.addEventListener('animationend', () => node.classList.add('risen'), { once: true });
   });
+}
+
+function initVine() {
+  const svg = document.getElementById('vine');
+  const NS = 'http://www.w3.org/2000/svg';
+  let stem, leaves = [], flowers = [], total = 0, docH = 0;
+
+  // Petals only: the footer's SK mark sits above the SVG and acts as the core.
+  const makeFlower = (x, y, L, count) => {
+    const W = L * 0.42;
+    const place = document.createElementNS(NS, 'g');
+    place.setAttribute('transform', `translate(${x} ${y})`);
+    const flower = document.createElementNS(NS, 'g');
+    flower.setAttribute('class', 'vine-flower');
+    for (let i = 0; i < count; i++) {
+      const turn = document.createElementNS(NS, 'g');
+      turn.setAttribute('transform', `rotate(${i * 360 / count})`);
+      const petal = document.createElementNS(NS, 'path');
+      petal.setAttribute('class', 'vine-petal' + (i % 2 ? ' alt' : ''));
+      petal.setAttribute('d', `M 0 0 C ${-W} ${-L * 0.4}, ${-W * 0.6} ${-L}, 0 ${-L} C ${W * 0.6} ${-L}, ${W} ${-L * 0.4}, 0 0 Z`);
+      petal.style.setProperty('--ox', `${W}px`); petal.style.setProperty('--oy', `${L}px`);
+      petal.style.setProperty('--i', i);
+      turn.appendChild(petal);
+      flower.appendChild(turn);
+    }
+    place.appendChild(flower);
+    svg.appendChild(place);
+    return flower;
+  };
+  const footer = document.querySelector('.footer');
+  const footerMark = document.querySelector('.footer-mark');
+  // scrollHeight would include the vine itself, so a shrinking page could
+  // never be detected; measure the content by the footer's bottom edge.
+  const contentHeight = () => Math.round(footer.offsetTop + footer.offsetHeight);
+
+  const build = () => {
+    docH = contentHeight();
+    const narrow = innerWidth < 720;
+    const cx = narrow ? 7 : 22, amp = narrow ? 2 : 12, wave = narrow ? 260 : 340;
+    const L = narrow ? 40 : 48;
+    const mr = footerMark.getBoundingClientRect();
+    const mx = mr.left + mr.width / 2, my = mr.top + scrollY + mr.height / 2;
+    const w = mx + L + 12;
+    svg.setAttribute('width', w); svg.setAttribute('height', docH);
+    svg.setAttribute('viewBox', `0 0 ${w} ${docH}`);
+    svg.innerHTML = '';
+
+    // The wave runs down to the footer, then the stem swings under the SK
+    // mark and grows into it — the mark is the heart of the closing flower.
+    const footerTop = footer.offsetTop;
+    let d = `M ${cx} 0`;
+    let y = 0, side = 1;
+    for (; y + wave <= footerTop; y += wave, side = -side) {
+      const y2 = y + wave;
+      d += ` C ${cx + amp * side} ${y + wave * 0.3}, ${cx + amp * side} ${y2 - wave * 0.3}, ${cx} ${y2}`;
+    }
+    const dip = my + mr.height * 0.9;
+    d += ` C ${cx} ${footerTop + (dip - footerTop) * 0.5}, ${cx} ${dip}, ${(cx + mx) / 2} ${dip}`;
+    d += ` C ${mx - 4} ${dip}, ${mx} ${my + mr.height * 0.5}, ${mx} ${my}`;
+    stem = document.createElementNS(NS, 'path');
+    stem.setAttribute('class', 'vine-stem');
+    stem.setAttribute('d', d);
+    svg.appendChild(stem);
+    total = stem.getTotalLength();
+    stem.style.strokeDasharray = `${total}`;
+    stem.style.strokeDashoffset = `${total}`;
+
+    leaves = []; flowers = [];
+    const step = narrow ? 200 : 230, size = narrow ? 6 : 14;
+    const tailLen = (my - footerTop) + (mx - cx) + 40;
+    for (let len = step * 0.8, n = 0; len < total - tailLen; len += step, n++) {
+      const p = stem.getPointAtLength(len);
+      const ahead = stem.getPointAtLength(Math.min(total, len + 2));
+      const dir = Math.sign(ahead.x - p.x) || (n % 2 ? 1 : -1);
+      // Narrow screens have no gutter to spare, so leaves hug the stem.
+      const angle = narrow ? (dir > 0 ? -70 : -110) : (dir > 0 ? -40 : -140);
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('transform', `translate(${p.x} ${p.y}) rotate(${angle})`);
+      const leaf = document.createElementNS(NS, 'path');
+      leaf.setAttribute('class', 'vine-leaf' + (leaves.length % 3 === 1 ? ' alt' : ''));
+      leaf.setAttribute('d', `M 0 0 C ${size * 0.9} ${-size * 0.4}, ${size * 1.6} ${size * 0.2}, ${size * 1.9} ${size * 0.9} C ${size * 1.1} ${size * 1.1}, ${size * 0.3} ${size * 0.8}, 0 0 Z`);
+      g.appendChild(leaf);
+      svg.appendChild(g);
+      const bb = leaf.getBBox();
+      leaf.style.setProperty('--ox', `${-bb.x}px`); leaf.style.setProperty('--oy', `${-bb.y}px`);
+      leaf.dataset.len = len;
+      leaves.push(leaf);
+    }
+    const bloom = makeFlower(mx, my, L, 8);
+    bloom.dataset.len = total - 2;
+    flowers.push(bloom);
+    drawn = target();
+    render();
+  };
+
+  // The tip sits a little below the middle of the viewport so the growth is
+  // always visible while scrolling; it eases toward that point each frame.
+  const target = () => {
+    const atEnd = scrollY + innerHeight >= docH - 2;
+    return total * (atEnd ? 1 : Math.min(1, (scrollY + innerHeight * 0.58) / docH));
+  };
+  let drawn = 0, ticking = false, lastT = 0;
+  const render = () => {
+    stem.style.strokeDashoffset = `${total - drawn}`;
+    leaves.forEach(l => l.classList.toggle('on', +l.dataset.len <= drawn));
+    flowers.forEach(f => f.classList.toggle('on', +f.dataset.len <= drawn));
+  };
+  const tick = (now) => {
+    const dt = Math.min(100, now - lastT); lastT = now;
+    const goal = target();
+    drawn += (goal - drawn) * (1 - Math.exp(-dt / 140));
+    if (Math.abs(goal - drawn) < 0.5) { drawn = goal; ticking = false; } else requestAnimationFrame(tick);
+    render();
+  };
+  const update = () => { if (!stem || ticking) return; ticking = true; lastT = performance.now(); requestAnimationFrame(tick); };
+
+  build();
+  window.addEventListener('scroll', update, { passive: true });
+  let raf = 0;
+  const rebuild = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (contentHeight() !== docH || svg.clientWidth === 0) build(); }); };
+  window.addEventListener('resize', rebuild);
+  new ResizeObserver(rebuild).observe(document.body);
+}
+
+function initScrollSpy() {
+  const links = [...document.querySelectorAll('.nav-links a')];
+  const sections = [...document.querySelectorAll('section[id]')];
+  const onScroll = () => {
+    const line = scrollY + innerHeight * 0.35;
+    let current = null;
+    sections.forEach(sec => { if (sec.offsetTop <= line) current = sec; });
+    if (scrollY + innerHeight >= document.documentElement.scrollHeight - 2) current = sections[sections.length - 1];
+    links.forEach(l => l.classList.toggle('active', !!current && l.hash === `#${current.id}`));
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 }
 
 function initReveal() {
@@ -296,6 +434,7 @@ function initWorkPreview() {
       preview.style.background = TINTS[+row.dataset.index % TINTS.length];
       preview.hidden = false;
     });
+    row.addEventListener('mouseleave', () => { preview.hidden = true; });
   });
 }
 

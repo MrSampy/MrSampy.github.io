@@ -129,6 +129,22 @@ textarea.input { min-height: 90px; resize: vertical; }
 .rise { animation: rise .9s var(--ease-out) both; }
 .rise.risen { animation: none; }
 
+/* ─── Vine ───────────────────────────────────────────────────────────────── */
+.vine { position: absolute; left: 0; top: 0; z-index: 1; pointer-events: none; overflow: visible; }
+.vine-stem { fill: none; stroke: var(--color-accent-2); stroke-width: 3; stroke-linecap: round; }
+.vine-leaf { fill: var(--color-accent-2); opacity: 0; transform: scale(0); transform-box: fill-box; transform-origin: var(--ox) var(--oy); transition: opacity .5s ease, transform .6s var(--spring); }
+.vine-leaf.alt { fill: var(--color-accent-2-400); }
+.vine-leaf.on { opacity: 1; transform: scale(1); }
+.vine-petal {
+  fill: var(--color-accent); transform: scale(0.1); opacity: 0;
+  transform-box: fill-box; transform-origin: var(--ox) var(--oy);
+  transition: transform .7s var(--spring) calc(var(--i) * 90ms), opacity .3s calc(var(--i) * 90ms);
+}
+.vine-petal.alt { fill: var(--color-accent-400); }
+.vine-flower.on .vine-petal { transform: scale(1); opacity: 1; }
+.vine-flower.on { animation: sway 5s ease-in-out 1.2s infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes sway { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
 /* ─── Nav ────────────────────────────────────────────────────────────────── */
 .nav {
   position: sticky; top: 0; z-index: 20;
@@ -146,8 +162,10 @@ textarea.input { min-height: 90px; resize: vertical; }
 .nav-mark:hover { background: var(--color-accent-600); color: var(--color-bg); }
 .nav-links { display: flex; gap: var(--space-1); flex-wrap: wrap; justify-content: flex-end; }
 .nav-link { padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--color-text); }
-.nav-link:hover { background: var(--color-accent-200); color: var(--color-accent-800); }
+.nav-link { transition: background .2s, color .2s; }
+.nav-link:hover, .nav-link.active { background: var(--color-accent-200); color: var(--color-accent-800); }
 .nav-contact { border-radius: 999px; padding: 10px 18px; }
+.nav-contact.active { background: var(--color-accent-700); }
 
 /* ─── Hero ───────────────────────────────────────────────────────────────── */
 .hero {
@@ -171,10 +189,12 @@ textarea.input { min-height: 90px; resize: vertical; }
 }
 .hero-row {
   position: relative; display: flex; align-items: center; gap: clamp(8px, 2vw, 28px);
+  user-select: none; -webkit-user-select: none;
   font-family: var(--font-heading); font-size: clamp(64px, 17vw, 260px);
   line-height: 0.9; letter-spacing: -0.03em;
 }
 .hero-row-1 { flex-wrap: nowrap; }
+.hero-name { display: inline-flex; flex: none; }
 .hero-row-2 { margin-top: clamp(4px, 1vw, 16px); }
 .tilt { display: inline-block; transition: transform .15s ease-out; will-change: transform; }
 .hero-word {
@@ -236,6 +256,31 @@ textarea.input { min-height: 90px; resize: vertical; }
 .o-accent2 { background: var(--color-accent-2); }
 .o-overlap { margin-left: -0.3em; }
 .o-pill { width: 0.5em; }
+
+/* Hourglass: the top chamber drains for 6s, then the whole flask flips in 1s.
+   A full chamber fills its box regardless of anchor, so the jump back to
+   rotate(0) with the sand states swapped is invisible. */
+.hourglass { animation: hg-flip 7s infinite; }
+.hg-chamber {
+  position: absolute; left: 0.09em; right: 0.09em; height: calc(50% - 0.07em);
+  overflow: hidden; background: color-mix(in srgb, var(--color-text) 14%, transparent);
+}
+.hg-top { top: 0.05em; border-radius: 999px 999px 0.06em 0.06em; }
+.hg-bottom { bottom: 0.05em; border-radius: 0.06em 0.06em 999px 999px; }
+.hg-sand { position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-bg); }
+.hg-top .hg-sand { animation: hg-drain 7s linear infinite; }
+.hg-bottom .hg-sand { animation: hg-pile 7s linear infinite; }
+.hg-stream {
+  position: absolute; left: 50%; top: 50%; width: 0.035em; height: 0.3em; margin-left: -0.0175em;
+  background: repeating-linear-gradient(var(--color-bg) 0 0.04em, transparent 0.04em 0.07em);
+  background-size: 100% 0.07em;
+  animation: hg-fall .5s linear infinite, hg-stream 7s linear infinite;
+}
+@keyframes hg-flip { 0%, 85.7% { transform: rotate(0); animation-timing-function: cubic-bezier(.65, 0, .35, 1); } 100% { transform: rotate(180deg); } }
+@keyframes hg-drain { 0% { height: 100%; } 84% { height: 0; } 100% { height: 0; } }
+@keyframes hg-pile { 0% { height: 0; } 84% { height: 100%; } 100% { height: 100%; } }
+@keyframes hg-stream { 0%, 82% { opacity: 1; } 85%, 100% { opacity: 0; } }
+@keyframes hg-fall { to { background-position: 0 0.07em; } }
 .o-grow { transition: transform .5s var(--spring), background .3s; }
 .o-grow:hover { transform: scale(1.12); }
 .o-spin { animation: spin 12s linear infinite; background-image: conic-gradient(var(--color-accent-2) 0 25%, transparent 25%); }
@@ -435,6 +480,6 @@ textarea.input { min-height: 90px; resize: vertical; }
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: var(--space-3); padding: var(--space-8) var(--gutter);
 }
-.footer-mark { background: var(--color-accent-2); }
-.footer-mark:hover { background: var(--color-accent-2-600); color: var(--color-bg); }
+.footer-mark { background: var(--color-accent-800); position: relative; z-index: 2; }
+.footer-mark:hover { background: var(--color-accent-700); color: var(--color-bg); }
 .footer span { font-size: 14px; color: var(--color-neutral-700); }
