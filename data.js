@@ -12,12 +12,18 @@ const DATA = {
     cvName: "Serhii-Kolosov-CV.pdf",
   },
 
+  // Shown under the hero badge, where a recruiter looks first.
+  availability: "Open to new roles · based in Stavanger · remote or hybrid across Europe",
+
+  // Drives the lattice in the Suite section.
+  suite: { start: 600, now: 4100, lattice: 64, tenants: 7 },
+
   metrics: [
     { value: 4, suffix: " yrs", label: "on one insurance platform" },
     { value: 7, suffix: "", label: "insurers in production" },
     { value: 140, suffix: "+", label: "features shipped" },
     { value: 800, suffix: "+", label: "database migrations" },
-    { value: 1100, suffix: "+", label: "pull requests merged" },
+    { value: 5, suffix: "×", label: "fewer critical defects" },
     { value: 7, suffix: "×", label: "test-suite growth" },
   ],
 
@@ -29,7 +35,7 @@ const DATA = {
       "Learning Norwegian (A1)",
     ],
     lookingFor:
-      "A product team shipping .NET at scale, where quality is owned by the people who write the code. Remote or hybrid across Europe.",
+      "A product team shipping .NET at scale, where quality is owned by the people who write the code — not inspected in afterwards.",
   },
 
   skills: [
