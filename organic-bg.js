@@ -168,8 +168,10 @@ class OrganicBg extends HTMLElement {
     );
     // Held to the right of the text column on wide screens, and low under it
     // on narrow ones, so the page keeps its reading contrast.
-    blob.scale.setScalar(small ? 1.15 : 1.55);
-    blob.position.set(small ? 0.15 : 2.9, small ? -2.5 : -0.95, 0);
+    blob.scale.setScalar(small ? 0.85 : 1.55);
+    // The loop re-derives Y every frame, so the resting height lives here.
+    const baseY = small ? -1.15 : -0.95;
+    blob.position.set(small ? 0.45 : 2.9, baseY, 0);
     scene.add(blob);
 
     const hit = new THREE.Mesh(new THREE.SphereGeometry(1.25, 16, 12), new THREE.MeshBasicMaterial({ visible: false }));
@@ -197,7 +199,7 @@ class OrganicBg extends HTMLElement {
         transparent: true, depthWrite: false,
       })
     );
-    eye.scale.setScalar(small ? 1.15 : 1.7);
+    eye.scale.setScalar(small ? 0.62 : 1.7);
     eye.renderOrder = 2;
     scene.add(eye);
 
@@ -290,7 +292,7 @@ class OrganicBg extends HTMLElement {
 
       blob.rotation.y = (reduce ? 0 : t * 0.05) + ptr.nx * 0.7 + scrollK * 0.35;
       blob.rotation.x = -ptr.ny * 0.55 + scrollK * 0.12;
-      blob.position.y = -0.5 - ptr.ny * 0.22 - scrollK * 0.18;
+      blob.position.y = baseY - ptr.ny * 0.22 - scrollK * 0.18;
       hit.position.copy(blob.position);
       hit.rotation.copy(blob.rotation);
 
