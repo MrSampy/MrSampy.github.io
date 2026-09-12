@@ -10,11 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProjects();
   renderEducation();
   renderContactLinks();
+  splitName();
   initSpine();
   initScrollSpy();
   initReveal();
   initCounters();
   initExpanders();
+  initLoad();
   initForm();
 });
 
@@ -55,8 +57,8 @@ function renderAvailability() {
 
 function renderSkills() {
   const grid = document.getElementById('skillsGrid');
-  DATA.skills.forEach(g => {
-    grid.appendChild(el('div', 'skill-card' + (g.exploring ? ' exploring' : ''), `
+  DATA.skills.forEach((g, i) => {
+    const card = el('div', 'skill-card' + (g.exploring ? ' exploring' : ''), `
       <div class="skill-head">
         <div>
           ${g.exploring ? '<span class="skill-kicker">Side projects &amp; study</span>' : ''}
@@ -65,7 +67,10 @@ function renderSkills() {
         <span class="skill-count">${String(g.items.length).padStart(2, '0')}</span>
       </div>
       <div class="pills">${pills(g.items)}</div>
-    `));
+    `);
+    card.setAttribute('data-reveal', '');
+    card.style.setProperty('--i', i % 3);
+    grid.appendChild(card);
   });
 }
 
@@ -94,7 +99,7 @@ function renderExperience() {
     const metrics = job.highlights.map(h => `
       <div class="xp-metric"><span class="xp-metric-v">${esc(h.value)}</span><span class="xp-metric-t">${esc(h.text)}</span></div>
     `).join('');
-    cards.appendChild(el('article', 'xp' + (job.current ? ' current' : ''), `
+    const card = el('article', 'xp' + (job.current ? ' current' : ''), `
       <div class="xp-when">
         <span class="xp-period">${esc(job.period)}</span>
         <span class="xp-loc">${esc(job.location || '')}</span>
@@ -112,7 +117,10 @@ function renderExperience() {
           <div class="expander-inner"><ul class="xp-bullets">${job.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>
         </div>
       </div>
-    `));
+    `);
+    card.setAttribute('data-reveal', '');
+    card.style.setProperty('--i', i % 3);
+    cards.appendChild(card);
   });
 }
 
@@ -281,26 +289,122 @@ function initScrollSpy() {
   onScroll();
 }
 
-// Section headings settle in; evidence is in the DOM at first paint.
+// Content settles into place as it arrives — it is in the DOM at first paint,
+// so a reader who scrolls past it fast still reads it.
 function initReveal() {
   const els = document.querySelectorAll('[data-reveal]');
   if (REDUCED || !('IntersectionObserver' in window)) {
-    els.forEach(node => { node.style.opacity = '1'; });
+    els.forEach(node => node.classList.add('in'));
     return;
   }
   const io = new IntersectionObserver(entries => {
     entries.forEach(en => {
       if (en.isIntersecting) {
-        en.target.style.opacity = '1';
+        en.target.classList.add('in');
         io.unobserve(en.target);
       }
     });
-  }, { threshold: 0.2 });
-  els.forEach(node => {
-    node.style.opacity = '0';
-    node.style.transition = 'opacity .2s var(--ease-out)';
-    io.observe(node);
+  }, { threshold: 0.12 });
+  els.forEach(node => { node.classList.add('pending'); io.observe(node); });
+}
+
+/* ─── The law: the pointer is a load ─────────────────────────────────────── */
+// Every disc leans toward it, the name gives under it, the badge spins up as
+// it approaches — and all of it settles back the moment the reader leaves.
+// One loop, one rule. On touch the load is the scroll instead.
+function splitName() {
+  const h = document.querySelector('.hero-name');
+  if (!h) return;
+  const text = h.textContent.trim();
+  h.textContent = '';
+  h.setAttribute('aria-label', text);
+  [...text].forEach(ch => {
+    const s = el('span', 'hero-ch' + (ch === ' ' ? ' space' : ''), ch === ' ' ? '&nbsp;' : esc(ch));
+    s.setAttribute('aria-hidden', 'true');
+    h.appendChild(s);
   });
+}
+
+function initLoad() {
+  if (REDUCED) return;
+  const eyes = [...document.querySelectorAll('[data-eye]')];
+  const chars = [...document.querySelectorAll('.hero-ch')];
+  const ring = document.querySelector('.hero-badge .ring');
+  const badge = document.querySelector('.hero-badge');
+  if (!eyes.length && !chars.length) return;
+
+  let px = -1e4, py = -1e4, pointerAt = -1e9;   // the load, in viewport space
+  let spin = 0, rate = 0, vel = 0, lastY = scrollY;
+
+  // Drive off the input that actually arrives rather than a media query: a
+  // laptop with a touchscreen reports a coarse pointer and still has a mouse.
+  window.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;      // a finger is a press, not a hover
+    px = e.clientX; py = e.clientY; pointerAt = performance.now();
+  }, { passive: true });
+  document.documentElement.addEventListener('pointerleave', () => { pointerAt = -1e9; });
+
+  // A tap is a load too.
+  chars.forEach(c => {
+    c.addEventListener('pointerdown', () => { c.classList.remove('hit'); void c.offsetWidth; c.classList.add('hit'); });
+    c.addEventListener('animationend', () => c.classList.remove('hit'));
+  });
+
+  const near = r => r.bottom > -60 && r.top < innerHeight + 60;
+
+  const loop = () => {
+    requestAnimationFrame(loop);
+    vel = vel * 0.86 + (scrollY - lastY) * 0.14;
+    lastY = scrollY;
+    const live = performance.now() - pointerAt < 2500;
+
+    // Read every rect before writing a single transform.
+    const eyeR = eyes.map(n => n.parentElement.getBoundingClientRect());
+    const charR = live ? chars.map(n => n.getBoundingClientRect()) : null;
+    const badgeR = live && badge ? badge.getBoundingClientRect() : null;
+
+    eyes.forEach((n, i) => {
+      const r = eyeR[i];
+      if (!near(r)) return;
+      let dx, dy;
+      if (live) {
+        dx = px - (r.left + r.width / 2);
+        dy = py - (r.top + r.height / 2);
+      } else {
+        // No pointer: the scroll is the load.
+        dx = 0;
+        dy = Math.max(-1, Math.min(1, vel / 26)) * r.width;
+      }
+      const d = Math.hypot(dx, dy) || 1;
+      const m = Math.min(d, r.width * 0.26);
+      n.style.transform = `translate(${(dx / d) * m}px, ${(dy / d) * m}px)`;
+    });
+
+    if (!live) {
+      rate = rate > 0.004 ? rate * 0.94 : 0;
+      chars.forEach(n => { if (n.style.transform) n.style.transform = ''; });
+      return;
+    }
+
+    chars.forEach((n, i) => {
+      const r = charR[i];
+      if (!near(r)) return;
+      const dx = px - (r.left + r.width / 2);
+      const dy = py - (r.top + r.height / 2);
+      n.style.transform = `translateY(${-11 * Math.exp(-(dx * dx + dy * dy) / 22500)}px)`;
+    });
+
+    if (ring && badgeR && near(badgeR)) {
+      const dx = px - (badgeR.left + badgeR.width / 2);
+      const dy = py - (badgeR.top + badgeR.height / 2);
+      rate += (Math.exp(-(dx * dx + dy * dy) / 67600) * 1.5 - rate) * 0.06;
+      if (rate > 0.004) {
+        spin += rate;
+        ring.style.transform = `rotate(${spin}deg)`;
+      }
+    }
+  };
+  requestAnimationFrame(loop);
 }
 
 function initForm() {

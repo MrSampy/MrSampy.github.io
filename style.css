@@ -1,15 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    MOTION RULES — the site is one system under load.
 
-   1. Nothing moves unless the reader moved it. No infinite animation anywhere.
-   2. There is exactly ONE signature motion: the spine drawing itself from the
-      scroll position. It lives in initSpine() and nowhere else.
-   3. Everything else is a state change: 200ms var(--ease-out), touching only
-      opacity, colour, or a translate of 8px or less.
-      Rotation is legal in exactly two declared places — the Experience chevron
-      and the work-row arrow. Nowhere else.
-   4. Nothing tracks the pointer. The net band responds to PRESS, not hover.
-   5. Evidence never animates in. Only a kicker or an h2 may carry data-reveal.
+   1. THE LAW: the pointer is a load. Whatever is near it gives toward it and
+      settles back the moment the reader leaves. The discs lean, the name gives,
+      the badge spins up, the net dips. One loop in initLoad(), one rule.
+      On touch there is no pointer, so the load is the scroll.
+   2. Nothing runs on a timer. Every animation is started by the reader —
+      a pointer, a press, or a scroll. No `infinite` anywhere in this file.
+   3. One signature draw: the spine, from scroll position. initSpine(), nowhere
+      else.
+   4. Everything else is a state change: ~200ms var(--ease-out), touching only
+      opacity, colour, or a transform under ~14px. Rotation is legal in three
+      declared places — the Experience chevron, the work-row arrow, the badge
+      ring under load.
+   5. Evidence is in the DOM at first paint. It may settle in; it may never
+      depend on an animation to become readable.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Organic tokens ─────────────────────────────────────────────────────── */
@@ -132,7 +137,23 @@ img { display: block; max-width: 100%; }
 .input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
 textarea.input { min-height: 90px; resize: vertical; }
 
-/* ─── Rule 2: the one signature motion ───────────────────────────────────── */
+/* ─── Rule 1: everything alive gives toward the load ─────────────────────── */
+.eye {
+  position: absolute; left: 50%; top: 50%; width: 30%; height: 30%; margin: -15% 0 0 -15%;
+  border-radius: 999px; background: var(--color-text);
+  transition: transform .12s var(--ease-out);
+}
+.contact .eye { background: var(--color-bg); }
+
+/* ─── Rule 5: content settles in, it never appears from nothing ──────────── */
+[data-reveal] {
+  transition: opacity .4s var(--ease-out) calc(var(--i, 0) * 60ms),
+              transform .4s var(--ease-out) calc(var(--i, 0) * 60ms);
+}
+[data-reveal].pending { opacity: 0; transform: translateY(14px); }
+[data-reveal].in { opacity: 1; transform: none; }
+
+/* ─── Rule 3: the one signature motion ───────────────────────────────────── */
 .spine {
   position: absolute; left: clamp(6px, 1.8vw, 22px); top: 0; bottom: 0; width: 2px;
   z-index: 1; pointer-events: none; border-radius: 999px;
@@ -181,6 +202,10 @@ textarea.input { min-height: 90px; resize: vertical; }
   font-size: clamp(44px, 9.4vw, 148px); line-height: 0.92; letter-spacing: -0.03em;
   margin: 0 0 clamp(24px, 4vh, 52px);
 }
+/* Each letter gives as the pointer passes under it, then settles. */
+.hero-ch { display: inline-block; will-change: transform; transition: transform .3s var(--settle); }
+.hero-ch.hit { animation: hit .5s var(--settle); }
+@keyframes hit { 30% { transform: translateY(-14px); } 100% { transform: none; } }
 .hero-foot {
   display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
   gap: clamp(24px, 4vw, 64px);
