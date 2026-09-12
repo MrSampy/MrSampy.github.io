@@ -61,11 +61,8 @@ function renderSkills() {
   DATA.skills.forEach((g, i) => {
     const card = el('div', 'skill-card' + (g.exploring ? ' exploring' : ''), `
       <div class="skill-head">
-        <div>
-          ${g.exploring ? '<span class="skill-kicker">Side projects &amp; study</span>' : ''}
-          <h3>${esc(g.label)}</h3>
-        </div>
-        <span class="skill-count">${String(g.items.length).padStart(2, '0')}</span>
+        ${g.exploring ? '<span class="skill-kicker">Side projects &amp; study</span>' : ''}
+        <h3>${esc(g.label)}</h3>
       </div>
       <div class="pills">${pills(g.items)}</div>
     `);

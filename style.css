@@ -344,17 +344,10 @@ html.vt .expander { transition: none; }
   transition: transform .2s var(--ease-out), box-shadow .2s var(--ease-out);
 }
 .skill-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.skill-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .skill-head h3 { font-size: 24px; margin: 0; }
 .skill-kicker { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-2-700); margin-bottom: 4px; }
-.skill-count {
-  width: 40px; height: 40px; border-radius: 999px; flex: none; background: var(--color-surface);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-heading); font-size: 15px; color: var(--color-text);
-}
 .skill-card.exploring { background: transparent; border: 1.5px dashed color-mix(in srgb, var(--color-text) 28%, transparent); }
 .skill-card.exploring .pill { border-style: dashed; }
-.skill-card.exploring .skill-count { background: var(--color-accent-2-200); }
 .langs { margin-top: var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
 .langs-list { display: contents; }
 .langs-k { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700); }
