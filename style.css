@@ -162,9 +162,11 @@ textarea.input { min-height: 90px; resize: vertical; }
 [data-reveal].in { opacity: 1; transform: none; }
 
 /* ─── Rule 3: the one signature motion ───────────────────────────────────── */
+/* Above the sections, not level with them: the sand and dark ones carry their
+   own background and would otherwise paint straight over the line. */
 .spine {
   position: absolute; left: clamp(6px, 1.8vw, 22px); top: 0; bottom: 0; width: 2px;
-  z-index: 1; pointer-events: none; border-radius: 999px;
+  z-index: 2; pointer-events: none; border-radius: 999px;
   background: color-mix(in srgb, var(--color-text) 9%, transparent);
 }
 .spine span {
