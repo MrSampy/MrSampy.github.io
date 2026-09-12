@@ -309,39 +309,67 @@ function initReveal() {
   els.forEach(node => { node.classList.add('pending'); io.observe(node); });
 }
 
-// The hourglass drains on the scroll through Experience: his four years pass
-// while you read them, and it flips over once you reach the end.
+// The one licensed exception to "nothing runs on a timer": an hourglass that
+// only moves when you scroll is a clock that ticks when you look away. It runs
+// on time — but only while it is actually on screen, and it restarts its cycle
+// each time it comes back, so you always catch it from full.
 function initGlass() {
   const glass = document.getElementById('glass');
-  const heading = glass && glass.closest('h2');
-  if (!glass || !heading) return;
+  if (!glass) return;
   const top = document.getElementById('hgTop');
   const bot = document.getElementById('hgBot');
   const stream = document.getElementById('hgStream');
   const TOP_Y = 3.4, BOT_Y = 28.6, H = 11.8;
+  const DRAIN = 3600, HOLD = 250, FLIP = 650, CYCLE = DRAIN + HOLD + FLIP;
 
-  let queued = false, flipped = false;
-  const draw = () => {
-    queued = false;
-    // Timed against the heading's own travel, not the section's height: the
-    // sand has to run while the glass is actually on screen.
-    const r = heading.getBoundingClientRect();
-    const p = Math.max(0, Math.min(1, (innerHeight * 0.85 - r.top) / (innerHeight * 0.55)));
-
+  const sand = (p) => {
     top.setAttribute('y', (TOP_Y + H * p).toFixed(2));
     top.setAttribute('height', (H * (1 - p)).toFixed(2));
     bot.setAttribute('y', (BOT_Y - H * p).toFixed(2));
     bot.setAttribute('height', (H * p).toFixed(2));
-    stream.style.opacity = p > 0.01 && p < 0.99 ? '1' : '0';
-
-    // Hysteresis, so a nudge at the boundary cannot flap the glass.
-    if (!flipped && p > 0.98) { flipped = true; glass.classList.add('flipped'); }
-    else if (flipped && p < 0.9) { flipped = false; glass.classList.remove('flipped'); }
+    stream.style.opacity = p > 0.015 && p < 0.985 ? '1' : '0';
   };
-  const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(draw); } };
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll);
-  draw();
+
+  if (REDUCED) { sand(0.45); return; }
+
+  let raf = 0, t0 = 0, running = false;
+  const frame = (now) => {
+    if (!running) return;
+    raf = requestAnimationFrame(frame);
+    const t = (now - t0) % CYCLE;
+    if (t < DRAIN) {
+      sand(t / DRAIN);
+      glass.style.transform = 'rotate(0deg)';
+    } else if (t < DRAIN + HOLD) {
+      sand(1);
+    } else {
+      // Drained and turned 180° looks exactly like full and upright, so the
+      // wrap back to the start of the cycle is invisible.
+      sand(1);
+      glass.style.transform = `rotate(${(180 * (t - DRAIN - HOLD)) / FLIP}deg)`;
+    }
+  };
+  const run = (on) => {
+    if (on === running) return;
+    running = on;
+    if (on) { t0 = performance.now(); raf = requestAnimationFrame(frame); }
+    else cancelAnimationFrame(raf);
+  };
+
+  sand(0);
+  if (!('IntersectionObserver' in window)) return run(true);
+  const io = new IntersectionObserver(
+    e => run(e[0].isIntersecting && document.visibilityState === 'visible'),
+    { threshold: 0.4 }
+  );
+  io.observe(glass);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') run(false);
+    else {
+      const r = glass.getBoundingClientRect();
+      run(r.top < innerHeight && r.bottom > 0);
+    }
+  });
 }
 
 /* ─── The law: the pointer is a load ─────────────────────────────────────── */

@@ -5,8 +5,11 @@
       settles back the moment the reader leaves. The discs lean, the name gives,
       the badge spins up, the net dips. One loop in initLoad(), one rule.
       On touch there is no pointer, so the load is the scroll.
-   2. Nothing runs on a timer. Every animation is started by the reader —
-      a pointer, a press, or a scroll. No `infinite` anywhere in this file.
+   2. Nothing runs on a timer, with ONE declared exception: the Experience
+      hourglass, because a clock that only ticks when you scroll is not a
+      clock. It runs only while it is on screen and restarts when it returns.
+      Everything else is started by the reader — pointer, press, or scroll.
+      No `infinite` anywhere in this file.
    3. One signature draw: the spine, from scroll position. initSpine(), nowhere
       else.
    4. Everything else is a state change: ~200ms var(--ease-out), touching only
@@ -274,14 +277,13 @@ html.vt .expander { transition: none; }
 .o-accent2 { background: var(--color-accent-2); }
 .o-overlap { margin-left: -0.3em; }
 
-/* The Experience mark is an hourglass, and the sand runs on your scroll
-   through the section: read his four years, watch them pass. Declared
-   rotation #4 — the flip at the end. */
+/* The Experience mark is an hourglass. Rotation and timing are driven from
+   initGlass() frame by frame — no CSS transition, so the wrap at the end of
+   each cycle is instant and invisible. Declared rotation #4. */
 .glass {
   display: inline-block; width: 0.56em; height: 0.82em; flex: none;
-  transition: transform .7s var(--settle);
+  will-change: transform;
 }
-.glass.flipped { transform: rotate(180deg); }
 .glass svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .hg-cap { fill: var(--color-accent); }
 .hg-glass { fill: none; stroke: var(--color-accent); stroke-width: 1.3; stroke-linejoin: round; }
