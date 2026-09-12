@@ -7,10 +7,10 @@
       On touch there is no pointer, so the load is the scroll.
    2. In the CONTENT layer, nothing runs on a timer — every animation is
       started by the reader, and there is no `infinite` in this file. Two
-      declared exceptions, both things that would be wrong if they held still:
+      declared exceptions, all things that would be wrong if they held still:
       the Experience hourglass (a clock that only ticks when you scroll is not
-      a clock) and the background's eye, which blinks and breathes. The
-      background lives behind the page; the page itself stays still.
+      a clock), the background's eye, and the discs in the headings — which
+      blink, and keep their own slow gaze whenever no pointer is driving them.
    3. One signature draw: the spine, from scroll position. initSpine(), nowhere
       else.
    4. Everything else is a state change: ~200ms var(--ease-out), touching only
@@ -151,6 +151,9 @@ textarea.input { min-height: 90px; resize: vertical; }
   border-radius: 999px; background: var(--color-text);
   transition: transform .12s var(--ease-out);
 }
+/* `scale` rather than `transform`, which the gaze loop writes every frame. */
+.o.blink .eye { animation: eye-blink .2s ease-in-out; }
+@keyframes eye-blink { 50% { scale: 1 0.08; } }
 .contact .eye { background: var(--color-bg); }
 
 /* ─── Rule 5: content settles in, it never appears from nothing ──────────── */

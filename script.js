@@ -437,8 +437,17 @@ function initLoad() {
   });
 
   const near = r => r.bottom > -60 && r.top < innerHeight + 60;
+  const clamp = (v) => Math.max(-1, Math.min(1, v));
 
-  const loop = () => {
+  // With no pointer to follow the discs keep their own slow gaze, drifting on
+  // two frequencies that never line up, and blink now and then. A drawn eye
+  // that holds perfectly still reads as broken rather than calm.
+  let nextBlink = 0;
+  eyes.forEach(n => n.parentElement.addEventListener('animationend', e => {
+    if (e.animationName === 'eye-blink') e.currentTarget.classList.remove('blink');
+  }));
+
+  const loop = (now) => {
     requestAnimationFrame(loop);
     vel = vel * 0.86 + (scrollY - lastY) * 0.14;
     lastY = scrollY;
@@ -449,21 +458,33 @@ function initLoad() {
     const charR = live ? chars.map(n => n.getBoundingClientRect()) : null;
     const badgeR = live && badge ? badge.getBoundingClientRect() : null;
 
+    if (!nextBlink) nextBlink = now + 1800;
+    else if (now >= nextBlink) {
+      nextBlink = now + 2600 + Math.random() * 4200;
+      eyes.forEach((n, i) => {
+        if (!near(eyeR[i])) return;
+        const o = n.parentElement;
+        o.classList.remove('blink'); void o.offsetWidth; o.classList.add('blink');
+      });
+    }
+
+    // One gaze for every disc, so the page looks in a single direction.
+    const wx = Math.sin(now * 0.00047) * 0.55 + Math.sin(now * 0.00121 + 1.3) * 0.3;
+    const wy = Math.sin(now * 0.00063 + 2.1) * 0.4 + clamp(vel / 26);
+
     eyes.forEach((n, i) => {
       const r = eyeR[i];
       if (!near(r)) return;
-      let dx, dy;
+      const m = r.width * 0.26;
       if (live) {
-        dx = px - (r.left + r.width / 2);
-        dy = py - (r.top + r.height / 2);
+        const dx = px - (r.left + r.width / 2);
+        const dy = py - (r.top + r.height / 2);
+        const d = Math.hypot(dx, dy) || 1;
+        const k = Math.min(d, m);
+        n.style.transform = `translate(${(dx / d) * k}px, ${(dy / d) * k}px)`;
       } else {
-        // No pointer: the scroll is the load.
-        dx = 0;
-        dy = Math.max(-1, Math.min(1, vel / 26)) * r.width;
+        n.style.transform = `translate(${clamp(wx) * m}px, ${clamp(wy) * m}px)`;
       }
-      const d = Math.hypot(dx, dy) || 1;
-      const m = Math.min(d, r.width * 0.26);
-      n.style.transform = `translate(${(dx / d) * m}px, ${(dy / d) * m}px)`;
     });
 
     if (!live) {
