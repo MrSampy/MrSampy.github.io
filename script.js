@@ -319,47 +319,72 @@ function initGlass() {
   const top = document.getElementById('hgTop');
   const bot = document.getElementById('hgBot');
   const stream = document.getElementById('hgStream');
-  const TOP_Y = 3.4, BOT_Y = 28.6, H = 11.8;
+  const grains = [...document.querySelectorAll('.hg-grain')];
+  const TOP_Y = 3.4, BOT_Y = 28.6, H = 11.8, NECK = 15.1;
   const DRAIN = 3600, HOLD = 250, FLIP = 650, CYCLE = DRAIN + HOLD + FLIP;
+  const FALL = 300;                       // ms for one grain to reach the pile
 
-  const sand = (p) => {
+  // p is how much has drained; `now` lets the grains fall between the levels,
+  // which is the part that actually reads as an hourglass running.
+  const sand = (raw, now) => {
+    const p = Math.max(0, Math.min(1, raw));
     top.setAttribute('y', (TOP_Y + H * p).toFixed(2));
-    top.setAttribute('height', (H * (1 - p)).toFixed(2));
+    top.setAttribute('height', Math.max(0, H * (1 - p)).toFixed(2));
     bot.setAttribute('y', (BOT_Y - H * p).toFixed(2));
-    bot.setAttribute('height', (H * p).toFixed(2));
-    stream.style.opacity = p > 0.015 && p < 0.985 ? '1' : '0';
+    bot.setAttribute('height', Math.max(0, H * p).toFixed(2));
+
+    const running = p > 0.012 && p < 0.99;
+    const pile = BOT_Y - H * p;           // surface the grains land on
+    const drop = Math.max(0.4, pile - 1 - NECK);
+    stream.style.opacity = running ? '' : '0';
+    stream.setAttribute('height', drop.toFixed(2));
+    grains.forEach((g, i) => {
+      if (!running) { g.style.opacity = '0'; return; }
+      g.style.opacity = '';
+      const phase = ((now / FALL) + i / grains.length) % 1;
+      g.setAttribute('y', (NECK + drop * phase).toFixed(2));
+    });
   };
 
-  if (REDUCED) { sand(0.45); return; }
+  if (REDUCED) { sand(0.45, 0); grains.forEach(g => { g.style.opacity = '0'; }); return; }
 
-  let raf = 0, t0 = 0, running = false;
+  // Time is accumulated from the frame timestamps themselves, never from a
+  // second clock, and a pause simply stops accumulating — so coming back from
+  // a hidden tab resumes rather than jumping.
+  let raf = 0, elapsed = 0, lastNow = 0, running = false;
   const frame = (now) => {
     if (!running) return;
     raf = requestAnimationFrame(frame);
-    const t = (now - t0) % CYCLE;
+    if (!lastNow) lastNow = now;
+    elapsed += Math.min(100, now - lastNow);
+    lastNow = now;
+    const t = elapsed % CYCLE;
     if (t < DRAIN) {
-      sand(t / DRAIN);
+      sand(t / DRAIN, now);
       glass.style.transform = 'rotate(0deg)';
     } else if (t < DRAIN + HOLD) {
-      sand(1);
+      sand(1, now);
     } else {
       // Drained and turned 180° looks exactly like full and upright, so the
       // wrap back to the start of the cycle is invisible.
-      sand(1);
+      sand(1, now);
       glass.style.transform = `rotate(${(180 * (t - DRAIN - HOLD)) / FLIP}deg)`;
     }
   };
-  const run = (on) => {
+  const run = (on, restart) => {
+    if (restart) elapsed = 0;
     if (on === running) return;
     running = on;
-    if (on) { t0 = performance.now(); raf = requestAnimationFrame(frame); }
+    lastNow = 0;
+    if (on) raf = requestAnimationFrame(frame);
     else cancelAnimationFrame(raf);
   };
 
-  sand(0);
+  sand(0, 0);
   if (!('IntersectionObserver' in window)) return run(true);
+  // Scrolling back to it starts the glass over; a hidden tab only pauses it.
   const io = new IntersectionObserver(
-    e => run(e[0].isIntersecting && document.visibilityState === 'visible'),
+    e => run(e[0].isIntersecting && document.visibilityState === 'visible', e[0].isIntersecting),
     { threshold: 0.4 }
   );
   io.observe(glass);
