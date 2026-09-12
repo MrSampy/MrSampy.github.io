@@ -5,11 +5,12 @@
       settles back the moment the reader leaves. The discs lean, the name gives,
       the badge spins up, the net dips. One loop in initLoad(), one rule.
       On touch there is no pointer, so the load is the scroll.
-   2. Nothing runs on a timer, with ONE declared exception: the Experience
-      hourglass, because a clock that only ticks when you scroll is not a
-      clock. It runs only while it is on screen and restarts when it returns.
-      Everything else is started by the reader — pointer, press, or scroll.
-      No `infinite` anywhere in this file.
+   2. In the CONTENT layer, nothing runs on a timer — every animation is
+      started by the reader, and there is no `infinite` in this file. Two
+      declared exceptions, both things that would be wrong if they held still:
+      the Experience hourglass (a clock that only ticks when you scroll is not
+      a clock) and the background's eye, which blinks and breathes. The
+      background lives behind the page; the page itself stays still.
    3. One signature draw: the spine, from scroll position. initSpine(), nowhere
       else.
    4. Everything else is a state change: ~200ms var(--ease-out), touching only
@@ -213,14 +214,15 @@ textarea.input { min-height: 90px; resize: vertical; }
 .hero-ch { display: inline-block; will-change: transform; transition: transform .3s var(--settle); }
 .hero-ch.hit { animation: hit .5s var(--settle); }
 @keyframes hit { 30% { transform: translateY(-14px); } 100% { transform: none; } }
+/* One column, held to the left: the right of the hero belongs to the eye. */
 .hero-foot {
-  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
-  gap: clamp(24px, 4vw, 64px);
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: var(--space-6); max-width: min(100%, 60ch);
 }
-.hero-main { flex: 1 1 420px; min-width: 0; }
+.hero-main { min-width: 0; }
 .hero-lede { max-width: 54ch; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.5; margin: 0 0 var(--space-6); }
 .hero-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-.hero-aside { flex: 0 1 250px; display: flex; flex-direction: column; gap: var(--space-3); align-items: flex-start; }
+.hero-aside { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
 .hero-badge {
   position: relative; flex: none; width: 124px; height: 124px; border-radius: 999px;
   background: var(--color-accent); color: var(--color-bg);
@@ -404,58 +406,14 @@ html.vt .expander { transition: none; }
   .xp-intro { max-width: 62ch; }
 }
 
-/* ─── The net, under the whole page ──────────────────────────────────────── */
-/* One fixed canvas behind everything. Sections that carry their own background
-   hide it; the open ones let it show through, and the suite band is the window
-   where you meet it up close. */
-.stage {
-  position: fixed; inset: 0; width: 100%; height: 100%; display: block;
-  z-index: 0; pointer-events: none; opacity: 0; transition: opacity .8s var(--ease-out);
-}
-.stage.ready { opacity: 1; }
+/* ─── The living background ──────────────────────────────────────────────── */
+/* One fixed WebGL layer behind the whole page. Sections that carry their own
+   background hide it; the open ones let it show through. */
+.stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .62; }
+@media (max-width: 719px) { .stage { opacity: .48; } }
 /* Content sits above the stage. The nav (sticky) and the spine (absolute)
    already carry their own positioning — do not restate it here. */
-.hero, .metrics, .section, .net, .footer { position: relative; z-index: 1; }
-
-.net {
-  overflow: hidden; height: clamp(420px, 78vh, 720px);
-  touch-action: pan-y; cursor: grab;
-}
-.net.pressing { cursor: grabbing; }
-/* Shown before three.js arrives, and kept for good if WebGL is unavailable. */
-.net-fallback { position: absolute; inset: 0; transition: opacity .6s var(--ease-out); }
-.net-fallback svg { width: 100%; height: 100%; display: block; }
-.nf-mesh { stroke: var(--color-accent-2); opacity: .55; }
-.nf-weights { fill: var(--color-text); }
-.net.ready .net-fallback { opacity: 0; }
-.net { position: relative; }
-/* The copy sits on a wash of the page colour so it stays legible wherever the
-   net happens to be loaded. */
-.net::before {
-  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: linear-gradient(102deg,
-    color-mix(in srgb, var(--color-bg) 97%, transparent) 0 30%,
-    color-mix(in srgb, var(--color-bg) 60%, transparent) 46%,
-    transparent 66%);
-}
-.net-copy {
-  position: absolute; inset: 0 auto auto 0; z-index: 2; max-width: min(100%, 38ch);
-  padding: var(--space-6) var(--gutter); pointer-events: none;
-}
-.net-title {
-  font-size: clamp(34px, 4.6vw, 64px); line-height: 0.95; letter-spacing: -0.02em;
-  margin: 0 0 var(--space-2); font-variant-numeric: tabular-nums;
-}
-.net-note { margin: 0; font-size: 15.5px; line-height: 1.5; max-width: 34ch; color: var(--color-neutral-800); }
-@media (max-width: 719px) {
-  .net { height: clamp(380px, 62vh, 520px); }
-  .net::before {
-    background: linear-gradient(color-mix(in srgb, var(--color-bg) 97%, transparent) 0 42%, transparent 72%);
-  }
-  .net-copy { max-width: 100%; }
-  .net-note { max-width: 40ch; }
-}
-@media (pointer: coarse) { .net-hint { display: none; } }
+.hero, .metrics, .section, .footer { position: relative; z-index: 1; }
 
 /* ─── Work ───────────────────────────────────────────────────────────────── */
 .work-list { display: flex; flex-direction: column; }

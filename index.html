@@ -52,9 +52,9 @@
       </div>
     </nav>
 
-    <!-- The net runs under the whole page: one object, seen from a distance
-         everywhere and up close in its own section. -->
-    <canvas class="stage" id="stage" aria-hidden="true"></canvas>
+    <!-- The living background: a wobbling form with an eye set into it that
+         follows the pointer, blinks, and reacts to scroll and clicks. -->
+    <div class="stage" aria-hidden="true"><organic-bg amp="0.16"></organic-bg></div>
 
     <!-- The one signature motion: a line that draws itself as you read. -->
     <div class="spine" aria-hidden="true"><span></span></div>
@@ -152,15 +152,6 @@
       <div class="xp-list" id="xpList"></div>
     </section>
 
-    <section class="net" aria-labelledby="netTitle">
-      <div class="net-copy">
-        <p class="kicker">The suite</p>
-        <h2 class="net-title" id="netTitle"><span id="netCount">4,096</span> knots</h2>
-        <p class="net-note">One knot per test. Scroll and the lattice tightens the way the suite did — 600 tests to 4,100 — and the sag under the seven insurers comes out of it.<span class="net-hint"> Press to put a load on it.</span></p>
-      </div>
-      <div class="net-fallback" aria-hidden="true"></div>
-    </section>
-
     <section id="work" class="section work">
       <p class="kicker" data-reveal>04 /</p>
       <h2 class="h-display" data-reveal>W<span class="o o-accent" aria-hidden="true"><span class="eye" data-eye></span></span>rk</h2>
@@ -202,6 +193,6 @@
 
     <script src="data.js"></script>
     <script src="script.js"></script>
-    <script src="net.js"></script>
+    <script type="module" src="organic-bg.js"></script>
   </body>
 </html>

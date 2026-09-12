@@ -15,9 +15,6 @@ const DATA = {
   // Shown under the hero badge, where a recruiter looks first.
   availability: "Open to new roles · based in Stavanger · remote or hybrid across Europe",
 
-  // Drives the lattice in the Suite section.
-  suite: { start: 600, now: 4100, lattice: 64, tenants: 7 },
-
   metrics: [
     { value: 4, suffix: " yrs", label: "on one insurance platform" },
     { value: 7, suffix: "", label: "insurers in production" },
