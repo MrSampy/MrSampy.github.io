@@ -273,7 +273,19 @@ html.vt .expander { transition: none; }
 .o-accent { background: var(--color-accent); }
 .o-accent2 { background: var(--color-accent-2); }
 .o-overlap { margin-left: -0.3em; }
-.o-pill { width: 0.5em; }
+
+/* The Experience mark is an hourglass, and the sand runs on your scroll
+   through the section: read his four years, watch them pass. Declared
+   rotation #4 — the flip at the end. */
+.glass {
+  display: inline-block; width: 0.56em; height: 0.82em; flex: none;
+  transition: transform .7s var(--settle);
+}
+.glass.flipped { transform: rotate(180deg); }
+.glass svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.hg-cap { fill: var(--color-accent); }
+.hg-glass { fill: none; stroke: var(--color-accent); stroke-width: 1.3; stroke-linejoin: round; }
+.hg-sand, .hg-stream { fill: var(--color-accent); }
 
 /* ─── About ──────────────────────────────────────────────────────────────── */
 .about {

@@ -125,15 +125,28 @@
 
     <section id="experience" class="section experience">
       <p class="kicker" data-reveal>03 /</p>
-      <h2 class="h-display h-display-pill" data-reveal><span class="o o-accent o-pill" aria-hidden="true"></span>Experience</h2>
+      <h2 class="h-display h-display-pill" data-reveal><span class="glass" id="glass" aria-hidden="true">
+        <svg viewBox="0 0 24 32" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <clipPath id="hgTopClip"><path d="M4.2 3.4 H19.8 L12 15.2 Z" /></clipPath>
+            <clipPath id="hgBotClip"><path d="M4.2 28.6 H19.8 L12 16.8 Z" /></clipPath>
+          </defs>
+          <g clip-path="url(#hgTopClip)"><rect class="hg-sand" id="hgTop" x="3" y="3.4" width="18" height="11.8" /></g>
+          <g clip-path="url(#hgBotClip)"><rect class="hg-sand" id="hgBot" x="3" y="28.6" width="18" height="0" /></g>
+          <rect class="hg-stream" id="hgStream" x="11.55" y="15" width="0.9" height="2" />
+          <path class="hg-glass" d="M4.2 3.4 H19.8 L12 15.2 Z M4.2 28.6 H19.8 L12 16.8 Z" />
+          <rect class="hg-cap" x="2.2" y="0.6" width="19.6" height="2.8" rx="1.4" />
+          <rect class="hg-cap" x="2.2" y="28.6" width="19.6" height="2.8" rx="1.4" />
+        </svg>
+      </span>Experience</h2>
       <div class="xp-list" id="xpList"></div>
     </section>
 
     <section class="net" aria-labelledby="netTitle">
       <div class="net-copy">
         <p class="kicker">The suite</p>
-        <h2 class="net-title" id="netTitle"><span id="netCount" data-count="4096" data-from="600">4,096</span> knots</h2>
-        <p class="net-note">4,100 tests guard the platform, 430 of them mine — one knot per test, rounded down to a 64 × 64 lattice. The seven weights are the insurers standing on it in production.<span class="net-hint"> Press and drag to load it.</span></p>
+        <h2 class="net-title" id="netTitle"><span id="netCount">4,096</span> knots</h2>
+        <p class="net-note">One knot per test. Scroll and the lattice tightens the way the suite did — 600 tests to 4,100 — and the sag under the seven insurers comes out of it.<span class="net-hint"> Press to put a load on it.</span></p>
       </div>
       <canvas class="net-canvas" aria-hidden="true"></canvas>
       <div class="net-fallback" aria-hidden="true"></div>

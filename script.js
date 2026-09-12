@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderContactLinks();
   splitName();
   initSpine();
+  initGlass();
   initScrollSpy();
   initReveal();
   initCounters();
@@ -306,6 +307,40 @@ function initReveal() {
     });
   }, { threshold: 0.12 });
   els.forEach(node => { node.classList.add('pending'); io.observe(node); });
+}
+
+// The hourglass drains on the scroll through Experience: his four years pass
+// while you read them, and it flips over once you reach the end.
+function initGlass() {
+  const glass = document.getElementById('glass');
+  const section = document.getElementById('experience');
+  if (!glass || !section) return;
+  const top = document.getElementById('hgTop');
+  const bot = document.getElementById('hgBot');
+  const stream = document.getElementById('hgStream');
+  const TOP_Y = 3.4, BOT_Y = 28.6, H = 11.8;
+
+  let queued = false, flipped = false;
+  const draw = () => {
+    queued = false;
+    const r = section.getBoundingClientRect();
+    const span = r.height + innerHeight * 0.6;
+    const p = Math.max(0, Math.min(1, (innerHeight * 0.8 - r.top) / span));
+
+    top.setAttribute('y', (TOP_Y + H * p).toFixed(2));
+    top.setAttribute('height', (H * (1 - p)).toFixed(2));
+    bot.setAttribute('y', (BOT_Y - H * p).toFixed(2));
+    bot.setAttribute('height', (H * p).toFixed(2));
+    stream.style.opacity = p > 0.01 && p < 0.99 ? '1' : '0';
+
+    // Hysteresis, so a nudge at the boundary cannot flap the glass.
+    if (!flipped && p > 0.98) { flipped = true; glass.classList.add('flipped'); }
+    else if (flipped && p < 0.9) { flipped = false; glass.classList.remove('flipped'); }
+  };
+  const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(draw); } };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  draw();
 }
 
 /* ─── The law: the pointer is a load ─────────────────────────────────────── */
