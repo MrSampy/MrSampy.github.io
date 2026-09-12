@@ -411,8 +411,7 @@ html.vt .expander { transition: none; }
 /* ─── The living background ──────────────────────────────────────────────── */
 /* One fixed WebGL layer behind the whole page. Sections that carry their own
    background hide it; the open ones let it show through. */
-.stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .62; }
-@media (max-width: 719px) { .stage { opacity: .58; } }
+.stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .92; }
 /* Content sits above the stage. The nav (sticky) and the spine (absolute)
    already carry their own positioning — do not restate it here. */
 .hero, .metrics, .section, .footer { position: relative; z-index: 1; }

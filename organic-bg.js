@@ -168,10 +168,28 @@ class OrganicBg extends HTMLElement {
     );
     // Held to the right of the text column on wide screens, and low under it
     // on narrow ones, so the page keeps its reading contrast.
-    blob.scale.setScalar(small ? 0.85 : 1.55);
-    // The loop re-derives Y every frame, so the resting height lives here.
-    const baseY = small ? -1.15 : -0.95;
-    blob.position.set(small ? 0.45 : 2.9, baseY, 0);
+    /* Placement is derived from the camera's actual field, not a width
+       breakpoint: a 728x1496 window is "wide" by pixel count but has almost no
+       horizontal room, and a fixed world X puts the eye outside the frame. */
+    const L = { blobX: 0, baseY: 0, blobS: 1, eyeS: 1, eyeDX: 0, eyeDY: 0, seedR: 1 };
+    const layout = () => {
+      const halfAt = (z) => Math.tan((camera.fov * Math.PI / 180) / 2) * (camera.position.z - z);
+      const halfH = halfAt(1.5);                       // at the eye's depth
+      const halfW = halfH * camera.aspect;
+      const wide = camera.aspect > 1.05;
+      L.eyeS = (wide ? 0.92 : 0.34) * halfH;
+      L.eyeDX = wide ? 0.5 : 0.12;
+      L.eyeDY = wide ? 0.85 : 0.42;
+      L.blobS = (wide ? 0.67 : 0.40) * halfAt(0);
+      L.seedR = wide ? halfW * 0.55 : halfW * 0.8;
+      const eyeX = wide ? Math.min(halfW * 0.5, 2.45) : halfW * 0.22;
+      const eyeY = wide ? halfH * 0.16 : -halfH * 0.42;
+      L.blobX = eyeX + L.eyeDX;
+      L.baseY = eyeY - L.eyeDY;
+    };
+    layout();
+    blob.scale.setScalar(L.blobS);
+    blob.position.set(L.blobX, L.baseY, 0);
     scene.add(blob);
 
     const hit = new THREE.Mesh(new THREE.SphereGeometry(1.25, 16, 12), new THREE.MeshBasicMaterial({ visible: false }));
@@ -184,11 +202,13 @@ class OrganicBg extends HTMLElement {
       uGaze: { value: new THREE.Vector2(0, 0) },
       uSclera: { value: col('--color-bg', '#f5ead8') },
       uShade: { value: col('--color-accent-200', '#f0d5bb') },
-      uIrisLo: { value: col('--color-accent-400', '#d79c6c') },
+      uIrisLo: { value: col('--color-accent-600', '#b2622d') },
       uIrisHi: { value: col('--color-accent-200', '#f0d5bb') },
       uRing: { value: col('--color-accent-2-400', '#a9b48c') },
-      uPupil: { value: col('--color-accent-500', '#c67139') },
-      uLine: { value: col('--color-accent-500', '#c67139') },
+      // Deeper than the handoff used: on this cream page the mid accent washed
+      // out to within a few values of the background and the eye vanished.
+      uPupil: { value: col('--color-accent-800', '#643312') },
+      uLine: { value: col('--color-accent-700', '#8c491a') },
       uGlint: { value: col('--color-bg', '#f5ead8') },
     };
 
@@ -199,7 +219,7 @@ class OrganicBg extends HTMLElement {
         transparent: true, depthWrite: false,
       })
     );
-    eye.scale.setScalar(small ? 0.62 : 1.7);
+    eye.scale.setScalar(L.eyeS);
     eye.renderOrder = 2;
     scene.add(eye);
 
@@ -222,7 +242,7 @@ class OrganicBg extends HTMLElement {
         new THREE.MeshBasicMaterial({ color: col(t, '#c5cdad') })
       );
       m.userData = {
-        r: (small ? 1.3 : 1.9) + (i % 3) * 0.36,
+        rNorm: 1 + (i % 3) * 0.22,
         a: (i / seedTints.length) * Math.PI * 2,
         sp: 0.12 + (i % 4) * 0.05,
         tilt: -0.5 + i * 0.22,
@@ -253,6 +273,7 @@ class OrganicBg extends HTMLElement {
       camera.aspect = innerWidth / innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(innerWidth, innerHeight);
+      layout();
     };
     addEventListener('mousemove', onMove, { passive: true });
     addEventListener('touchmove', onMove, { passive: true });
@@ -292,9 +313,12 @@ class OrganicBg extends HTMLElement {
 
       blob.rotation.y = (reduce ? 0 : t * 0.05) + ptr.nx * 0.7 + scrollK * 0.35;
       blob.rotation.x = -ptr.ny * 0.55 + scrollK * 0.12;
-      blob.position.y = baseY - ptr.ny * 0.22 - scrollK * 0.18;
+      blob.scale.setScalar(L.blobS);
+      blob.position.x = L.blobX;
+      blob.position.y = L.baseY - ptr.ny * 0.22 - scrollK * 0.18;
       hit.position.copy(blob.position);
       hit.rotation.copy(blob.rotation);
+      hit.scale.copy(blob.scale);
 
       ndc.set((ptr.x / innerWidth) * 2 - 1, -(ptr.y / innerHeight) * 2 + 1);
       ray.setFromCamera(ndc, camera);
@@ -308,9 +332,10 @@ class OrganicBg extends HTMLElement {
       }
 
       // eye sits on the blob, tilts a little for depth, gazes at the cursor
+      eye.scale.setScalar(L.eyeS);
       eye.position.set(
-        blob.position.x - (small ? 0.1 : 0.5) + ptr.nx * 0.18,
-        blob.position.y + (small ? 0.45 : 0.85) - ptr.ny * 0.1,
+        blob.position.x - L.eyeDX + ptr.nx * 0.18,
+        blob.position.y + L.eyeDY - ptr.ny * 0.1,
         1.5 + burst * 0.35
       );
       eye.rotation.set(-ptr.ny * 0.16, ptr.nx * 0.22, ptr.nx * 0.03);
@@ -340,9 +365,10 @@ class OrganicBg extends HTMLElement {
       seeds.forEach((s, i) => {
         const d = s.userData;
         const a = d.a + (reduce ? 0 : t * d.sp) + ptr.nx * 0.5;
+        const r = L.seedR * d.rNorm;
         d.home.set(
-          blob.position.x + Math.cos(a) * d.r,
-          blob.position.y + Math.sin(a) * d.r * 0.62 + d.tilt * 0.4,
+          blob.position.x + Math.cos(a) * r,
+          blob.position.y + Math.sin(a) * r * 0.62 + d.tilt * 0.4,
           Math.sin(a * 1.3 + i) * 1.4
         );
         const pull = 1 + burst * 1.6;
