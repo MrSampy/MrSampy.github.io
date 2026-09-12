@@ -52,6 +52,10 @@
       </div>
     </nav>
 
+    <!-- The net runs under the whole page: one object, seen from a distance
+         everywhere and up close in its own section. -->
+    <canvas class="stage" id="stage" aria-hidden="true"></canvas>
+
     <!-- The one signature motion: a line that draws itself as you read. -->
     <div class="spine" aria-hidden="true"><span></span></div>
 
@@ -148,7 +152,6 @@
         <h2 class="net-title" id="netTitle"><span id="netCount">4,096</span> knots</h2>
         <p class="net-note">One knot per test. Scroll and the lattice tightens the way the suite did — 600 tests to 4,100 — and the sag under the seven insurers comes out of it.<span class="net-hint"> Press to put a load on it.</span></p>
       </div>
-      <canvas class="net-canvas" aria-hidden="true"></canvas>
       <div class="net-fallback" aria-hidden="true"></div>
     </section>
 

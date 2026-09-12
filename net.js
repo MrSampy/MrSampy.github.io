@@ -1,18 +1,24 @@
-/* The suite, as an object you can load.
+/* The net runs under the whole page.
 
-   One knot per test. Scrolling through the band tightens the lattice from
-   24 × 24 to 64 × 64 — the suite's real growth, 600 tests to 4,100 — and the
-   sag under the seven insurers comes out of it as it tightens. Pressing puts
-   your own load on it. Nothing moves on a timer; three.js is fetched only when
-   the band comes close, and the same numbers render as flat SVG without it. */
+   One object: a lattice with one knot per test in the platform suite, carrying
+   seven weights — the seven insurers in production. It is not a band you pass;
+   it is the ground the site sits on. Scrolling the page tightens the lattice
+   from 24 x 24 to 64 x 64 knots, which is the suite's own growth from 600 tests
+   to 4,100, and the sag under the weights comes out of it as it tightens. The
+   camera rides high and far for most of the page and drops down close in the
+   suite section, where you can press the net and feel it give.
+
+   Nothing runs on a timer. three.js is fetched only when the reader gets near
+   the suite section, and the same numbers render as a flat SVG without it. */
 (() => {
   const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
   const band = document.querySelector('.net');
-  if (!band) return;
-  const canvas = band.querySelector('.net-canvas');
+  const canvas = document.getElementById('stage');
+  if (!band || !canvas) return;
   const countEl = document.getElementById('netCount');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
   const fmt = n => new Intl.NumberFormat('en-US').format(n);
 
   const S = (window.DATA && DATA.suite) || { lattice: 64, tenants: 7 };
@@ -36,26 +42,29 @@
     return y;
   };
 
-  // How far the reader is through the band: 0 as it enters, 1 as it leaves.
-  const progress = () => {
-    const r = band.getBoundingClientRect();
-    return clamp((innerHeight - r.top) / (r.height + innerHeight), 0, 1);
+  // How far the reader is through the page: the suite grew over four years,
+  // so it grows over the whole document rather than inside one band.
+  const pageProgress = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    return max > 0 ? clamp(scrollY / max, 0, 1) : 1;
   };
-  // Eased so the net stays visibly loose for most of the band and pulls tight
-  // at the end — the suite's growth was back-loaded too.
-  const grown = p => Math.pow(p, 1.6);
+  // 1 when the suite section is centred, 0 when it is a screen away.
+  const focusOn = () => {
+    const r = band.getBoundingClientRect();
+    const off = r.top + r.height / 2 - innerHeight / 2;
+    return clamp(1 - Math.abs(off) / (innerHeight * 1.15), 0, 1);
+  };
+  const grown = p => Math.pow(p, 1.35);
   const sideFor = p => Math.round(M_MIN + (N - M_MIN) * grown(p));
-  // Fewer threads, more give: the sag falls out as the lattice tightens.
   const sagScale = p => 1.8 - 0.8 * grown(p);
 
   let shownSide = -1;
   const syncCount = () => {
-    const m = sideFor(progress());
+    const m = sideFor(pageProgress());
     if (m !== shownSide) {
       shownSide = m;
       if (countEl) countEl.textContent = fmt(m * m);
     }
-    return m;
   };
   syncCount();
   window.addEventListener('scroll', syncCount, { passive: true });
@@ -66,10 +75,7 @@
     const host = band.querySelector('.net-fallback');
     if (!host) return;
     const M = 26;
-    const px = (x, z, y) => {
-      const depth = 1 + z * 0.004;
-      return [500 + x * 7.4 * depth, 210 + z * 3.1 - y * 5.2];
-    };
+    const px = (x, z, y) => [500 + x * 7.4 * (1 + z * 0.004), 210 + z * 3.1 - y * 5.2];
     const at = k => -HALF + k * (SIZE / (M - 1));
     let d = '';
     for (let i = 0; i < M; i++) {
@@ -98,7 +104,7 @@
     started = true;
     near.disconnect();
     start();
-  }, { rootMargin: '700px 0px' });
+  }, { rootMargin: '900px 0px' });
   near.observe(band);
 
   async function start() {
@@ -107,48 +113,44 @@
 
     let renderer;
     try {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
     } catch { return; }
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    renderer.setClearAlpha(0);
 
-    const cream = new THREE.Color('#f5ead8');
     const scene = new THREE.Scene();
-    scene.background = cream;
-    scene.fog = new THREE.Fog(cream, 95, 215);
+    scene.fog = new THREE.Fog(new THREE.Color('#f5ead8'), 110, 260);
 
-    const camera = new THREE.PerspectiveCamera(42, 1, 1, 400);
+    const camera = new THREE.PerspectiveCamera(42, 1, 1, 460);
     scene.add(new THREE.HemisphereLight(0xf5ead8, 0x56633f, 0.75));
     const key = new THREE.DirectionalLight(0xfff0db, 0.9);
     key.position.set(40, 70, 50);
     scene.add(key);
 
-    /* One position buffer, shared by the lines and the knots. The lattice is
-       re-laid only when the knot count actually changes — a few dozen times
-       over the whole band, never per frame. */
     const MAX = N * N;
     const pos = new THREE.BufferAttribute(new Float32Array(MAX * 3), 3);
     const col = new THREE.BufferAttribute(new Float32Array(MAX * 3), 3);
     const base = new Float32Array(MAX);
 
+    const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 });
     const lineGeo = new THREE.BufferGeometry();
     lineGeo.setAttribute('position', pos);
     lineGeo.setAttribute('color', col);
-    scene.add(new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 })));
+    scene.add(new THREE.LineSegments(lineGeo, lineMat));
 
+    const dotMat = new THREE.PointsMaterial({ vertexColors: true, size: 0.9, sizeAttenuation: true, transparent: true, opacity: 0.9 });
     const dotGeo = new THREE.BufferGeometry();
     dotGeo.setAttribute('position', pos);
     dotGeo.setAttribute('color', col);
-    scene.add(new THREE.Points(dotGeo, new THREE.PointsMaterial({ vertexColors: true, size: 0.9, sizeAttenuation: true })));
+    scene.add(new THREE.Points(dotGeo, dotMat));
 
     const rest = new THREE.Color('#7a8a5e');
     const loadedTone = new THREE.Color('#c67139');
     for (let i = 0; i < MAX; i++) col.setXYZ(i, rest.r, rest.g, rest.b);
 
-    const balls = WEIGHTS.map(([x, z, r]) => {
-      const m = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(r, 1),
-        new THREE.MeshLambertMaterial({ color: '#201e1d', flatShading: true })
-      );
+    const ballMat = new THREE.MeshLambertMaterial({ color: '#201e1d', flatShading: true, transparent: true, opacity: 1 });
+    const balls = WEIGHTS.map(([, , r]) => {
+      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), ballMat);
       scene.add(m);
       return m;
     });
@@ -176,7 +178,6 @@
       dotGeo.setDrawRange(0, knots);
     };
 
-    // The pointer is a load: press and the net gives, release and it settles.
     const ray = new THREE.Raycaster();
     const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     const hitAt = new THREE.Vector3();
@@ -185,21 +186,19 @@
     const PRESS_DEPTH = 11, PRESS_SIGMA = 17;
 
     const aim = (e) => {
-      const r = canvas.getBoundingClientRect();
       ray.setFromCamera(
-        new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1),
+        new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1),
         camera
       );
       if (ray.ray.intersectPlane(ground, hitAt)) { press.x = hitAt.x; press.z = hitAt.z; }
     };
 
-    const shape = () => {
-      const p = progress();
+    const build = () => {
+      const p = pageProgress(), f = focusOn();
       setGrid(sideFor(p));
-      const k = sagScale(p);
-      const L = press.load;
-
+      const k = sagScale(p), L = press.load;
       const step = SIZE / (side - 1);
+
       for (let i = 0; i < knots; i++) {
         let y = base[i] * k, dip = 0;
         if (L > 0.001) {
@@ -228,32 +227,38 @@
         m.position.set(x, y + r * 0.86, z);
       });
 
-      // The object turns toward the load, which is what makes it read as an
-      // object rather than a picture.
-      camera.position.set(look.x * 16, 30 + look.y * 9, 92);
-      camera.lookAt(look.x * 5, -7 + look.y * 3, 0);
+      // Far and high over most of the page; down close in the suite section.
+      // The lean toward the pointer is what makes it read as an object.
+      lineMat.opacity = lerp(0.26, 0.95, f);
+      dotMat.opacity = lerp(0.18, 0.95, f);
+      ballMat.opacity = lerp(0.3, 1, f);
+      // A portrait viewport has far less horizontal field, so stand further
+      // back and keep the whole net in frame.
+      const pull = clamp(1.7 / camera.aspect, 1, 1.9);
+      camera.position.set(look.x * 16, lerp(96, 30, f) * pull + look.y * 9, lerp(168, 92, f) * pull);
+      camera.lookAt(look.x * 5, lerp(-34, -7, f) + look.y * 3, 0);
     };
 
     const resize = () => {
-      const w = band.clientWidth, h = band.clientHeight;
-      if (!w || !h) return;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
+      renderer.setSize(innerWidth, innerHeight, false);
+      camera.aspect = innerWidth / innerHeight;
       camera.updateProjectionMatrix();
     };
 
     resize();
-    shape();
+    build();
+    canvas.classList.add('ready');
+    band.classList.add('ready');
 
     if (reduced) {
       renderer.render(scene, camera);
-      window.addEventListener('resize', () => { resize(); shape(); renderer.render(scene, camera); });
-      window.addEventListener('scroll', () => { shape(); renderer.render(scene, camera); }, { passive: true });
-      band.classList.add('ready');
+      const redraw = () => { resize(); build(); renderer.render(scene, camera); };
+      window.addEventListener('resize', redraw);
+      window.addEventListener('scroll', redraw, { passive: true });
       return;
     }
 
-    let raf = 0, running = false;
+    let raf = 0, running = false, lastKey = '';
     const frame = () => {
       raf = requestAnimationFrame(frame);
       const d = press.want - press.load;
@@ -261,47 +266,41 @@
       if (Math.abs(d) < 0.002) press.load = press.want;
       look.x += (look.tx - look.x) * 0.07;
       look.y += (look.ty - look.y) * 0.07;
-      shape();
+      // Nothing moved, nothing to draw: a still reader costs no GPU.
+      const key = Math.round(scrollY) + '|' + look.x.toFixed(3) + '|' + look.y.toFixed(3)
+        + '|' + press.load.toFixed(3) + '|' + innerWidth + 'x' + innerHeight;
+      if (key === lastKey) return;
+      lastKey = key;
+      build();
       renderer.render(scene, camera);
     };
     const run = (on) => {
       if (on === running) return;
       running = on;
-      if (on) raf = requestAnimationFrame(frame); else cancelAnimationFrame(raf);
+      if (on) { raf = requestAnimationFrame(frame); } else cancelAnimationFrame(raf);
     };
-
-    const onScreen = new IntersectionObserver(
-      entries => run(entries[0].isIntersecting && document.visibilityState === 'visible'),
-      { rootMargin: '120px 0px' }
-    );
-    onScreen.observe(band);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState !== 'visible') return run(false);
-      const r = band.getBoundingClientRect();
-      run(r.bottom > -120 && r.top < innerHeight + 120);
-    });
+    run(document.visibilityState === 'visible');
+    document.addEventListener('visibilitychange', () => run(document.visibilityState === 'visible'));
     window.addEventListener('resize', resize);
 
-    band.addEventListener('pointermove', e => {
+    // The pointer leans the whole scene; pressing inside the suite section
+    // puts a real load on the net.
+    window.addEventListener('pointermove', e => {
       if (e.pointerType !== 'touch') {
-        const r = band.getBoundingClientRect();
-        look.tx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
-        look.ty = clamp(1 - ((e.clientY - r.top) / r.height) * 2, -1, 1);
+        look.tx = clamp((e.clientX / innerWidth) * 2 - 1, -1, 1);
+        look.ty = clamp(1 - (e.clientY / innerHeight) * 2, -1, 1);
       }
       if (press.want) aim(e);
     }, { passive: true });
-    band.addEventListener('pointerleave', () => { look.tx = 0; look.ty = 0; });
 
-    canvas.addEventListener('pointerdown', e => {
+    band.addEventListener('pointerdown', e => {
       aim(e);
       press.want = 1;
-      try { canvas.setPointerCapture(e.pointerId); } catch {}
+      try { band.setPointerCapture(e.pointerId); } catch {}
       band.classList.add('pressing');
     });
     const release = () => { press.want = 0; band.classList.remove('pressing'); };
-    canvas.addEventListener('pointerup', release);
-    canvas.addEventListener('pointercancel', release);
-
-    band.classList.add('ready');
+    band.addEventListener('pointerup', release);
+    band.addEventListener('pointercancel', release);
   }
 })();

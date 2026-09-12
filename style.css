@@ -395,24 +395,31 @@ html.vt .expander { transition: none; }
   .xp-intro { max-width: 62ch; }
 }
 
-/* ─── The suite (WebGL band) ─────────────────────────────────────────────── */
+/* ─── The net, under the whole page ──────────────────────────────────────── */
+/* One fixed canvas behind everything. Sections that carry their own background
+   hide it; the open ones let it show through, and the suite band is the window
+   where you meet it up close. */
+.stage {
+  position: fixed; inset: 0; width: 100%; height: 100%; display: block;
+  z-index: 0; pointer-events: none; opacity: 0; transition: opacity .8s var(--ease-out);
+}
+.stage.ready { opacity: 1; }
+/* Content sits above the stage. The nav (sticky) and the spine (absolute)
+   already carry their own positioning — do not restate it here. */
+.hero, .metrics, .section, .net, .footer { position: relative; z-index: 1; }
+
 .net {
-  position: relative; overflow: hidden; height: clamp(380px, 66vh, 660px);
-  background: var(--color-bg);
-  border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider);
+  overflow: hidden; height: clamp(420px, 78vh, 720px);
+  touch-action: pan-y; cursor: grab;
 }
-.net-canvas {
-  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
-  opacity: 0; transition: opacity .6s var(--ease-out); touch-action: pan-y; cursor: grab;
-}
-.net.ready .net-canvas { opacity: 1; }
-.net.pressing .net-canvas { cursor: grabbing; }
+.net.pressing { cursor: grabbing; }
 /* Shown before three.js arrives, and kept for good if WebGL is unavailable. */
 .net-fallback { position: absolute; inset: 0; transition: opacity .6s var(--ease-out); }
 .net-fallback svg { width: 100%; height: 100%; display: block; }
 .nf-mesh { stroke: var(--color-accent-2); opacity: .55; }
 .nf-weights { fill: var(--color-text); }
 .net.ready .net-fallback { opacity: 0; }
+.net { position: relative; }
 /* The copy sits on a wash of the page colour so it stays legible wherever the
    net happens to be loaded. */
 .net::before {
@@ -432,7 +439,7 @@ html.vt .expander { transition: none; }
 }
 .net-note { margin: 0; font-size: 15.5px; line-height: 1.5; max-width: 34ch; color: var(--color-neutral-800); }
 @media (max-width: 719px) {
-  .net { height: clamp(340px, 56vh, 460px); }
+  .net { height: clamp(380px, 62vh, 520px); }
   .net::before {
     background: linear-gradient(color-mix(in srgb, var(--color-bg) 97%, transparent) 0 42%, transparent 72%);
   }

@@ -313,8 +313,8 @@ function initReveal() {
 // while you read them, and it flips over once you reach the end.
 function initGlass() {
   const glass = document.getElementById('glass');
-  const section = document.getElementById('experience');
-  if (!glass || !section) return;
+  const heading = glass && glass.closest('h2');
+  if (!glass || !heading) return;
   const top = document.getElementById('hgTop');
   const bot = document.getElementById('hgBot');
   const stream = document.getElementById('hgStream');
@@ -323,9 +323,10 @@ function initGlass() {
   let queued = false, flipped = false;
   const draw = () => {
     queued = false;
-    const r = section.getBoundingClientRect();
-    const span = r.height + innerHeight * 0.6;
-    const p = Math.max(0, Math.min(1, (innerHeight * 0.8 - r.top) / span));
+    // Timed against the heading's own travel, not the section's height: the
+    // sand has to run while the glass is actually on screen.
+    const r = heading.getBoundingClientRect();
+    const p = Math.max(0, Math.min(1, (innerHeight * 0.85 - r.top) / (innerHeight * 0.55)));
 
     top.setAttribute('y', (TOP_Y + H * p).toFixed(2));
     top.setAttribute('height', (H * (1 - p)).toFixed(2));
