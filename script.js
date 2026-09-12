@@ -1,6 +1,10 @@
 const TINTS = ['var(--color-accent-200)', 'var(--color-accent-2-200)', 'var(--color-neutral-200)'];
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINE = window.matchMedia('(pointer: fine)').matches;
 
 document.addEventListener('DOMContentLoaded', () => {
+  renderMetrics();
+  renderNow();
   renderSkills();
   renderLanguages();
   renderExperience();
@@ -12,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCritter();
   initScrollSpy();
   initReveal();
+  initCounters();
+  initExpanders();
   initPointer();
   initTouchMotion();
   initWorkPreview();
@@ -29,17 +35,40 @@ function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+const fmt = n => new Intl.NumberFormat('en-US').format(n);
+const pills = (items, cls = 'pill') => items.map((s, j) => `<span class="${cls}" style="--i:${j}">${esc(s)}</span>`).join('');
+
 /* ─── Render ─────────────────────────────────────────────────────────────── */
+function renderMetrics() {
+  const grid = document.getElementById('metrics');
+  DATA.metrics.forEach(m => {
+    const node = el('div', 'metric', `
+      <span class="metric-num" data-count="${m.value}" data-suffix="${esc(m.suffix)}">${fmt(m.value)}${esc(m.suffix)}</span>
+      <span class="metric-label">${esc(m.label)}</span>
+    `);
+    node.setAttribute('data-reveal', '');
+    grid.appendChild(node);
+  });
+}
+
+function renderNow() {
+  const list = document.getElementById('nowList');
+  DATA.now.doing.forEach(item => list.appendChild(el('li', null, esc(item))));
+  document.getElementById('lookingFor').textContent = DATA.now.lookingFor;
+}
+
 function renderSkills() {
   const grid = document.getElementById('skillsGrid');
   DATA.skills.forEach((g, i) => {
-    const pills = g.items.map((s, j) => `<span class="pill" style="--i:${j}">${esc(s)}</span>`).join('');
-    const card = el('div', 'skill-card', `
+    const card = el('div', 'skill-card' + (g.exploring ? ' exploring' : ''), `
       <div class="skill-head">
-        <h3>${esc(g.label)}</h3>
+        <div>
+          ${g.exploring ? '<span class="skill-kicker">Side projects &amp; study</span>' : ''}
+          <h3>${esc(g.label)}</h3>
+        </div>
         <span class="skill-count" style="background:${TINTS[i % TINTS.length]}">${String(g.items.length).padStart(2, '0')}</span>
       </div>
-      <div class="pills">${pills}</div>
+      <div class="pills">${pills(g.items)}</div>
     `);
     card.setAttribute('data-reveal', '');
     grid.appendChild(card);
@@ -49,55 +78,100 @@ function renderSkills() {
 function renderLanguages() {
   const list = document.getElementById('langList');
   DATA.languages.forEach(l => {
-    const level = /native/i.test(l.level) ? 'native' : l.level;
-    list.appendChild(el('span', 'lang', `<i></i>${esc(l.name)} — ${esc(level)}`));
+    list.appendChild(el('span', 'lang', `<i></i>${esc(l.name)} — ${esc(l.level)}`));
   });
 }
 
 function renderExperience() {
+  const X = DATA.experience;
   const list = document.getElementById('xpList');
-  DATA.experience.forEach(job => {
-    const card = el('div', 'xp', `
+  const group = el('div', 'xp-group', `
+    <div class="xp-group-head">
+      <span class="xp-company">${esc(X.company)}</span>
+      <span class="xp-group-period">${esc(X.period)}</span>
+    </div>
+    <p class="xp-intro">${esc(X.intro)}</p>
+  `);
+  group.setAttribute('data-reveal', '');
+  list.appendChild(group);
+  const cards = el('div', 'xp-cards');
+  list.appendChild(cards);
+
+  X.roles.forEach((job, i) => {
+    const metrics = job.highlights.map(h => `
+      <div class="xp-metric"><span class="xp-metric-v">${esc(h.value)}</span><span class="xp-metric-t">${esc(h.text)}</span></div>
+    `).join('');
+    const card = el('article', 'xp' + (job.current ? ' current' : ''), `
       <div class="xp-when">
         <span class="xp-period">${esc(job.period)}</span>
         <span class="xp-loc">${esc(job.location || '')}</span>
       </div>
       <div class="xp-body">
         <h3>${esc(job.role)}</h3>
-        <p class="xp-company">${esc(job.company)}</p>
-        <p class="xp-summary">${esc(job.summary || job.description.join('. '))}</p>
+        <p class="xp-summary">${esc(job.summary)}</p>
+        <div class="xp-stack">${pills(job.stack, 'chip')}</div>
+        <div class="xp-metrics">${metrics}</div>
+        <button type="button" class="xp-toggle" data-expander="xp" aria-expanded="false" aria-controls="xpMore${i}">
+          <span class="xp-toggle-open">Details</span><span class="xp-toggle-close">Less</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="expander xp-more" id="xpMore${i}">
+          <div class="expander-inner"><ul class="xp-bullets">${job.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>
+        </div>
       </div>
     `);
     card.setAttribute('data-reveal', '');
-    list.appendChild(card);
+    cards.appendChild(card);
   });
 }
 
 function renderProjects() {
   const list = document.getElementById('workList');
   DATA.projects.forEach((p, i) => {
-    const href = p.github || p.demo || '#work';
-    const row = el('a', 'work-row', `
+    const row = el('button', 'work-row', `
       <span class="work-num">${String(i + 1).padStart(2, '0')}</span>
       <span class="work-meta">
-        <span class="work-title">${esc(p.title)}</span>
-        <span class="work-stack">${esc(p.tags.join(' · '))}</span>
+        <span class="work-title" style="view-transition-name: work-title-${i}">${esc(p.title)}</span>
+        <span class="work-stack">${esc(p.stack.join(' · '))}</span>
       </span>
       <span class="work-arrow">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M8 7h9v9"></path></svg>
       </span>
     `);
-    row.href = href;
-    if (href !== '#work') { row.target = '_blank'; row.rel = 'noopener'; }
+    row.type = 'button';
     row.dataset.index = i;
+    row.dataset.expander = 'work';
+    row.setAttribute('aria-expanded', 'false');
+    row.setAttribute('aria-controls', `case${i}`);
+    row.style.setProperty('view-transition-name', `work-row-${i}`);
     list.appendChild(row);
 
-    const detail = el('div', 'work-detail', `
-      <div class="preview-tags">${p.tags.slice(0, 3).map(t => `<span class="preview-tag">${esc(t)}</span>`).join('')}</div>
-      <p>${esc(p.description)}</p>
-      ${href !== '#work' ? `<a class="btn btn-primary" href="${esc(href)}" target="_blank" rel="noopener">${p.github ? 'Open on GitHub' : 'Open live'} ↗</a>` : ''}
+    const links = [
+      p.demo && `<a class="btn btn-primary" href="${esc(p.demo)}" target="_blank" rel="noopener">Open live ↗</a>`,
+      p.github && `<a class="btn btn-secondary" href="${esc(p.github)}" target="_blank" rel="noopener">GitHub ↗</a>`,
+    ].filter(Boolean).join('');
+    const meta = [p.kind, p.role, p.year].filter(Boolean).map(t => `<span class="case-meta">${esc(t)}</span>`).join('');
+    const detail = el('div', 'expander work-detail', `
+      <div class="expander-inner">
+        <div class="case" style="background:${TINTS[i % TINTS.length]}">
+          <div class="case-head">
+            <div class="case-metas">${meta}</div>
+            <div class="pills">${pills(p.stack, 'chip')}</div>
+          </div>
+          <div class="case-grid">
+            <div class="case-col"><h4>Problem</h4><p>${esc(p.problem)}</p></div>
+            <div class="case-col"><h4>What I built</h4><p>${esc(p.built)}</p></div>
+            <div class="case-col"><h4>Outcome</h4><p>${esc(p.outcome)}</p></div>
+          </div>
+          <div class="case-foot">
+            ${links || (p.confidential ? '<span class="case-note">Client work — code and demo are not public.</span>' : '')}
+            <span class="preview-dots" aria-hidden="true"><span class="dot-accent"></span><span class="dot-accent2"></span><span class="dot-text"></span></span>
+          </div>
+        </div>
+      </div>
     `);
-    detail.style.background = TINTS[i % TINTS.length];
+    detail.id = `case${i}`;
+    detail.style.setProperty('view-transition-name', `work-detail-${i}`);
     list.appendChild(detail);
   });
   list.appendChild(el('div', 'work-end'));
@@ -106,8 +180,8 @@ function renderProjects() {
 function renderEducation() {
   const list = document.getElementById('eduList');
   DATA.education.forEach(e => {
-    list.appendChild(el('div', 'edu', `
-      <span class="edu-period">${esc(e.period)}</span>
+    list.appendChild(el('div', 'edu' + (e.current ? ' current' : ''), `
+      <span class="edu-period">${esc(e.period)}${e.current ? ' · in progress' : ''}</span>
       <h3>${esc(e.degree)}</h3>
       <span class="edu-school">${esc(e.institution)}</span>
     `));
@@ -121,16 +195,70 @@ function renderContactLinks() {
     { label: 'LinkedIn', href: P.linkedin },
     { label: 'GitHub', href: P.github },
     { label: 'Email', href: `mailto:${P.email}` },
+    { label: 'Phone', href: `tel:${P.phone.replace(/\s+/g, '')}` },
     { label: 'Telegram', href: P.telegram },
-    { label: 'CV (PDF)', href: 'assets/CV.pdf', download: true },
+    { label: 'CV (PDF)', href: P.cvFile, download: P.cvName },
   ];
   links.forEach(l => {
     const a = el('a', 'contact-pill', esc(l.label));
     a.href = l.href;
-    if (l.download) a.setAttribute('download', '');
-    else if (!l.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+    if (l.download) a.setAttribute('download', l.download);
+    else if (/^https?:/.test(l.href)) { a.target = '_blank'; a.rel = 'noopener'; }
     box.appendChild(a);
   });
+}
+
+/* ─── Interaction ────────────────────────────────────────────────────────── */
+function initExpanders() {
+  const buttons = [...document.querySelectorAll('[data-expander]')];
+  const setOpen = (btn, open) => {
+    const panel = document.getElementById(btn.getAttribute('aria-controls'));
+    btn.setAttribute('aria-expanded', String(open));
+    btn.classList.toggle('open', open);
+    panel.classList.toggle('open', open);
+  };
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      const exclusive = btn.dataset.expander === 'work';
+      const apply = () => {
+        if (exclusive) buttons.forEach(b => { if (b !== btn && b.dataset.expander === 'work') setOpen(b, false); });
+        setOpen(btn, open);
+      };
+      // Same-document View Transition: rows glide and the case cross-fades.
+      // The CSS height transition is suppressed for its duration so the new
+      // snapshot is captured in its final state.
+      if (exclusive && document.startViewTransition && !REDUCED && document.visibilityState === 'visible') {
+        document.documentElement.classList.add('vt');
+        const done = () => document.documentElement.classList.remove('vt');
+        const t = document.startViewTransition(apply);
+        // A transition skipped by the browser rejects all three promises.
+        t.ready.catch(() => {});
+        t.updateCallbackDone.catch(() => {});
+        t.finished.then(done, done);
+      } else apply();
+    });
+  });
+}
+
+function initCounters() {
+  const nodes = [...document.querySelectorAll('[data-count]')];
+  if (REDUCED || !nodes.length || !('IntersectionObserver' in window)) return;
+  const animate = node => {
+    const target = +node.dataset.count, suffix = node.dataset.suffix || '';
+    const t0 = performance.now(), dur = 900;
+    const tick = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmt(Math.round(target * e)) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+  nodes.forEach(n => { n.textContent = '0' + (n.dataset.suffix || ''); });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) { io.unobserve(en.target); animate(en.target); } });
+  }, { threshold: 0.4 });
+  nodes.forEach(n => io.observe(n));
 }
 
 /* ─── Motion ─────────────────────────────────────────────────────────────── */
@@ -238,6 +366,7 @@ function initVine() {
   // The tip sits a little below the middle of the viewport so the growth is
   // always visible while scrolling; it eases toward that point each frame.
   const target = () => {
+    if (REDUCED) return total;
     const atEnd = scrollY + innerHeight >= docH - 2;
     return total * (atEnd ? 1 : Math.min(1, (scrollY + innerHeight * 0.58) / docH));
   };
@@ -267,7 +396,6 @@ function initVine() {
 function initCritter() {
   const el = document.getElementById('critter');
   const toggle = document.getElementById('critterToggle');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const W = () => el.offsetWidth, H = () => el.offsetHeight;
@@ -306,7 +434,7 @@ function initCritter() {
   window.addEventListener('scroll', () => {
     const now = performance.now(), v = Math.abs(scrollY - lastScroll) / Math.max(1, now - lastScrollT) * 1000;
     lastScroll = scrollY; lastScrollT = now;
-    if (running && v > 2600 && window.matchMedia('(pointer: coarse)').matches) scare();
+    if (running && v > 2600 && !FINE) scare();
   }, { passive: true });
 
   const step = (now) => {
@@ -369,7 +497,7 @@ function initCritter() {
 
   let saved = null;
   try { saved = localStorage.getItem('snail'); } catch {}
-  const enabled = saved ? saved === 'on' : !reduced;
+  const enabled = saved ? saved === 'on' : !REDUCED;
   toggle.addEventListener('click', () => setEnabled(!running));
   setEnabled(enabled);
 }
@@ -390,7 +518,10 @@ function initScrollSpy() {
 
 function initReveal() {
   const els = document.querySelectorAll('[data-reveal]');
-  if (!('IntersectionObserver' in window)) return;
+  if (REDUCED || !('IntersectionObserver' in window)) {
+    els.forEach(node => node.classList.add('in'));
+    return;
+  }
   const io = new IntersectionObserver(entries => {
     entries.forEach(en => {
       if (en.isIntersecting) {
@@ -410,16 +541,17 @@ function initReveal() {
 }
 
 function initPointer() {
-  if (!window.matchMedia('(pointer: fine)').matches) return;
+  if (!FINE) return;
   const hero = document.getElementById('hero');
   let mx = innerWidth / 2, my = innerHeight / 2;
 
   window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
 
-  const tilts = [...document.querySelectorAll('[data-tilt]')];
-  const magnets = [...document.querySelectorAll('[data-magnet]')];
+  // Under reduced motion only the eyes follow the pointer.
+  const tilts = REDUCED ? [] : [...document.querySelectorAll('[data-tilt]')];
+  const magnets = REDUCED ? [] : [...document.querySelectorAll('[data-magnet]')];
   const eyes = [...document.querySelectorAll('[data-eye]')];
-  const parallax = [...document.querySelectorAll('[data-parallax]')].map(node => ({ el: node.parentElement, k: +node.getAttribute('data-parallax') }));
+  const parallax = REDUCED ? [] : [...document.querySelectorAll('[data-parallax]')].map(node => ({ el: node.parentElement, k: +node.getAttribute('data-parallax') }));
 
   const loop = () => {
     if (hero.getBoundingClientRect().bottom > 0) {
@@ -452,12 +584,12 @@ function initPointer() {
 }
 
 function initTouchMotion() {
-  if (window.matchMedia('(pointer: fine)').matches) return;
+  if (FINE) return;
 
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const eyes = [...document.querySelectorAll('[data-eye]')];
-  const tilts = [...document.querySelectorAll('[data-tilt]')];
-  const parallax = [...document.querySelectorAll('[data-parallax]')].map(node => ({ el: node.parentElement, k: +node.getAttribute('data-parallax') }));
+  const tilts = REDUCED ? [] : [...document.querySelectorAll('[data-tilt]')];
+  const parallax = REDUCED ? [] : [...document.querySelectorAll('[data-parallax]')].map(node => ({ el: node.parentElement, k: +node.getAttribute('data-parallax') }));
   const hero = document.getElementById('hero');
 
   document.querySelectorAll('.hero-word').forEach(word => {
@@ -513,20 +645,11 @@ function initTouchMotion() {
   const io = new IntersectionObserver(entries => {
     entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
   }, { threshold: 0.6 });
-  rows.forEach(row => {
-    io.observe(row);
-    row.addEventListener('click', e => {
-      e.preventDefault();
-      const open = !row.classList.contains('open');
-      rows.forEach(r => { r.classList.remove('open'); r.nextElementSibling.classList.remove('open'); });
-      row.classList.toggle('open', open);
-      row.nextElementSibling.classList.toggle('open', open);
-    });
-  });
+  rows.forEach(row => io.observe(row));
 }
 
 function initWorkPreview() {
-  if (!window.matchMedia('(pointer: fine)').matches) return;
+  if (!FINE) return;
   const section = document.getElementById('work');
   const preview = document.getElementById('preview');
   const tags = document.getElementById('previewTags');
@@ -539,13 +662,15 @@ function initWorkPreview() {
   section.addEventListener('mouseleave', () => { preview.hidden = true; });
   section.querySelectorAll('.work-row').forEach(row => {
     row.addEventListener('mouseenter', () => {
+      if (row.getAttribute('aria-expanded') === 'true') return;
       const p = DATA.projects[+row.dataset.index];
-      tags.innerHTML = p.tags.slice(0, 2).map(t => `<span class="preview-tag">${esc(t)}</span>`).join('');
-      text.textContent = p.description;
+      tags.innerHTML = p.stack.slice(0, 2).map(t => `<span class="preview-tag">${esc(t)}</span>`).join('');
+      text.textContent = p.summary;
       preview.style.background = TINTS[+row.dataset.index % TINTS.length];
       preview.hidden = false;
     });
     row.addEventListener('mouseleave', () => { preview.hidden = true; });
+    row.addEventListener('click', () => { preview.hidden = true; });
   });
 }
 

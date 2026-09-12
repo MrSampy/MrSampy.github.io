@@ -3,8 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Serhii Kolosov — .NET Developer</title>
-    <meta name="description" content="Portfolio of Serhii Kolosov — .NET and Full Stack Developer" />
+    <title>Serhii Kolosov — Full Stack .NET Developer</title>
+    <meta name="description" content="Full Stack .NET Developer in Stavanger, Norway. Four years on an enterprise insurance platform — C# / ASP.NET Core, EF Core, T-SQL — from test automation to shipping policy-lifecycle features." />
+    <link rel="canonical" href="https://mrsampy.github.io/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Serhii Kolosov — Full Stack .NET Developer" />
+    <meta property="og:description" content="Four years on an enterprise insurance platform — C# / ASP.NET Core, EF Core, T-SQL — from test automation through QA leadership to feature development." />
+    <meta property="og:url" content="https://mrsampy.github.io/" />
+    <meta property="og:image" content="https://mrsampy.github.io/assets/photo_1.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Serhii Kolosov — Full Stack .NET Developer" />
+    <meta name="twitter:description" content="Enterprise .NET, insurance platforms, test automation. Based in Stavanger, working internationally." />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Serhii Kolosov",
+      "jobTitle": "Full Stack .NET Developer",
+      "url": "https://mrsampy.github.io/",
+      "image": "https://mrsampy.github.io/assets/photo_1.png",
+      "address": { "@type": "PostalAddress", "addressLocality": "Stavanger", "addressCountry": "NO" },
+      "worksFor": { "@type": "Organization", "name": "In-Core" },
+      "alumniOf": { "@type": "CollegeOrUniversity", "name": "Kyiv Polytechnic Institute" },
+      "sameAs": ["https://github.com/MrSampy", "https://www.linkedin.com/in/serhiy-kolosov-00118124b"]
+    }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -59,7 +82,7 @@
       <div class="blob blob-1" aria-hidden="true"><span data-parallax="-40"></span></div>
       <div class="blob blob-2" aria-hidden="true"><span data-parallax="60"></span></div>
 
-      <p class="hero-eyebrow">.NET developer · AI engineer · Stavanger, Norway</p>
+      <p class="hero-eyebrow">Full Stack .NET Developer · Stavanger, Norway</p>
 
       <div class="hero-row hero-row-1">
         <span class="hero-name">
@@ -67,8 +90,8 @@
         </span>
         <div class="ticker rise">
           <div class="ticker-track">
-            <span>C# / .NET • Full stack • Applied ML • RAG systems • Compliance platforms • Clean architecture •&nbsp;</span>
-            <span>C# / .NET • Full stack • Applied ML • RAG systems • Compliance platforms • Clean architecture •&nbsp;</span>
+            <span>C# / .NET • ASP.NET Core • EF Core • T-SQL • Insurance platforms • Integrations • Test automation •&nbsp;</span>
+            <span>C# / .NET • ASP.NET Core • EF Core • T-SQL • Insurance platforms • Integrations • Test automation •&nbsp;</span>
           </div>
         </div>
       </div>
@@ -88,27 +111,37 @@
       </div>
 
       <div class="hero-foot">
-        <p class="hero-lede rise">I build enterprise .NET systems and applied ML tools — from compliance platforms to RAG pipelines. Production-grade, scalable, and honest about trade-offs.</p>
+        <p class="hero-lede rise">Four years on one enterprise insurance platform — from test automation through QA leadership to shipping policy-lifecycle features in C# / ASP.NET Core, EF Core and T-SQL. With the QA instinct to know what breaks in production before it does.</p>
         <div class="hero-actions rise">
           <a href="#work" class="btn btn-primary btn-lg">View selected work</a>
-          <a href="assets/CV.pdf" download class="btn btn-secondary btn-lg">Download CV</a>
+          <a href="assets/CV.pdf" download="Serhii-Kolosov-CV.pdf" class="btn btn-secondary btn-lg">Download CV</a>
         </div>
       </div>
     </section>
+
+    <div class="metrics" aria-label="By the numbers">
+      <div class="metrics-grid" id="metrics"></div>
+    </div>
 
     <section id="about" class="section about">
       <div data-reveal>
         <p class="kicker">01 /</p>
         <h2 class="h-display about-h">Ab<span class="o o-accent2 o-grow" aria-hidden="true"><span class="eye" data-eye></span></span>ut<span class="sr-only">o</span></h2>
-        <p class="about-lede">Hello, I'm Serhii. I'm a full stack developer at In-Core, based in Stavanger and working internationally. My design philosophy is clarity — clear domain models, clear APIs, clear trade-offs. Restraint over cleverness.</p>
+        <p class="about-lede">Hello, I'm Serhii — a full stack .NET developer at In-Core, based in Stavanger and working internationally. I've spent four years on one enterprise insurance platform, moving from test automation through QA leadership into feature development, and I still carry the QA instinct: know what breaks in production before it does.</p>
         <ul class="dot-list">
-          <li><i class="dot-accent"></i>Full Stack Developer at In-Core</li>
-          <li><i class="dot-accent2"></i>Software Engineering student at KPI</li>
+          <li><i class="dot-accent"></i>Software Engineer at In-Core</li>
+          <li><i class="dot-accent2"></i>M.Sc. Software Engineering student at KPI</li>
           <li><i class="dot-neutral"></i>Exploring AI/ML — RAG systems and LLM tooling</li>
         </ul>
-        <div class="callout">
-          <span class="callout-k">What I'm looking for</span>
-          <span class="callout-t">A product team shipping .NET at scale, where ML is a tool rather than a slogan. Remote or hybrid across Europe.</span>
+        <div class="callouts">
+          <div class="callout callout-now">
+            <span class="callout-k">Now</span>
+            <ul class="callout-list" id="nowList"></ul>
+          </div>
+          <div class="callout">
+            <span class="callout-k">What I'm looking for</span>
+            <span class="callout-t" id="lookingFor"></span>
+          </div>
         </div>
       </div>
       <div class="portrait" data-reveal>
