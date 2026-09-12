@@ -59,6 +59,10 @@
   --color-accent-2-800: #3d472b;
   --color-accent-2-900: #272e1b;
 
+  /* The palette has no yellow, and the hourglass needs one: a warm sand that
+     is lighter and yellower than the terracotta vessel holding it. */
+  --color-sand: #e0bb7a;
+
   --font-heading: "Caprasimo", system-ui, sans-serif;
   --font-heading-weight: 400;
   --font-body: "Figtree", system-ui, sans-serif;
@@ -289,8 +293,8 @@ html.vt .expander { transition: none; }
 .hg-glass { fill: none; stroke: var(--color-accent); stroke-width: 1.3; stroke-linejoin: round; }
 /* Vessel in terracotta, contents darker — otherwise the sand reads as part of
    the glass rather than as something falling through it. */
-.hg-sand, .hg-grain { fill: var(--color-neutral-500); }
-.hg-stream { fill: var(--color-neutral-500); opacity: .6; }
+.hg-sand, .hg-grain { fill: var(--color-sand); }
+.hg-stream { fill: var(--color-sand); opacity: .7; }
 
 /* ─── About ──────────────────────────────────────────────────────────────── */
 .about {
