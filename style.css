@@ -145,6 +145,42 @@ textarea.input { min-height: 90px; resize: vertical; }
 .vine-flower.on { animation: sway 5s ease-in-out 1.2s infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes sway { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
 
+/* ─── Critter ────────────────────────────────────────────────────────────── */
+.critter {
+  position: fixed; left: 0; top: 0; z-index: 4; pointer-events: none;
+  width: 48px; height: 36px; opacity: 0; transition: opacity .6s;
+  will-change: transform; image-rendering: pixelated;
+}
+.critter svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.critter.awake { opacity: 1; }
+/* Snail gait: the foot stretches forward from the shell, then the shell
+   hitches up and catches up. Stepped so it stays pixel-crisp. */
+.critter-body, .critter-shell, .critter-stalks { transform-box: fill-box; }
+.critter-body { transform-origin: 100% 100%; }
+.critter-shell { transform-origin: 0 100%; }
+.critter-stalks { transform-origin: 50% 100%; }
+.critter.moving .critter-body { animation: foot .7s steps(3, jump-none) infinite; }
+.critter.moving .critter-shell { animation: shell .7s steps(3, jump-none) infinite; }
+.critter.moving .critter-stalks { animation: wiggle .7s steps(2, jump-none) infinite; }
+.critter.flee .critter-body, .critter.flee .critter-shell, .critter.flee .critter-stalks { animation-duration: .22s; }
+.critter.scared svg { animation: startle .45s steps(4) 1; }
+.critter.scared .critter-stalks { animation: duck .45s steps(2) 1; }
+@keyframes foot {
+  0%   { transform: scaleX(1); }
+  34%  { transform: scaleX(1.16); }
+  67%  { transform: scaleX(1.08) translateY(-1px); }
+  100% { transform: scaleX(1); }
+}
+@keyframes shell {
+  0%, 34% { transform: translate(0, 0); }
+  67%     { transform: translate(-1px, -1.5px) rotate(-6deg); }
+  100%    { transform: translate(0, 0); }
+}
+@keyframes wiggle { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+@keyframes startle { 0% { transform: translateY(0); } 25% { transform: translateY(-10px); } 50% { transform: translateY(0) translateX(-3px); } 75% { transform: translateY(0) translateX(3px); } 100% { transform: translateY(0); } }
+@keyframes duck { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.25); } }
+@media (max-width: 719px) { .critter { width: 36px; height: 27px; } }
+
 /* ─── Nav ────────────────────────────────────────────────────────────────── */
 .nav {
   position: sticky; top: 0; z-index: 20;
@@ -483,3 +519,10 @@ textarea.input { min-height: 90px; resize: vertical; }
 .footer-mark { background: var(--color-accent-800); position: relative; z-index: 2; }
 .footer-mark:hover { background: var(--color-accent-700); color: var(--color-bg); }
 .footer span { font-size: 14px; color: var(--color-neutral-700); }
+.footer-toggle {
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--color-neutral-700);
+  background: transparent; border: 1px solid var(--color-divider); border-radius: 999px;
+  padding: 6px 14px; cursor: pointer; transition: background .2s, color .2s;
+}
+.footer-toggle:hover { background: var(--color-accent-200); color: var(--color-accent-800); }
+.footer-toggle[aria-pressed="false"] { opacity: .7; }

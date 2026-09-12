@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderContactLinks();
   initRise();
   initVine();
+  initCritter();
   initScrollSpy();
   initReveal();
   initPointer();
@@ -261,6 +262,116 @@ function initVine() {
   const rebuild = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (contentHeight() !== docH || svg.clientWidth === 0) build(); }); };
   window.addEventListener('resize', rebuild);
   new ResizeObserver(rebuild).observe(document.body);
+}
+
+function initCritter() {
+  const el = document.getElementById('critter');
+  const toggle = document.getElementById('critterToggle');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const W = () => el.offsetWidth, H = () => el.offsetHeight;
+  const TOP = 90;
+  const maxX = () => Math.max(8, innerWidth - W() - 8), maxY = () => Math.max(TOP, innerHeight - H() - 8);
+
+  let x = clamp(rand(40, innerWidth - 100), 8, maxX()), y = clamp(rand(innerHeight * 0.5, innerHeight - 80), TOP, maxY());
+  // The sprite faces left; scaleX(-1) turns it to the right.
+  let tx = x, ty = y, facing = 1, resting = 0, flee = 0, scared = 0, last = 0, running = false, raf = 0;
+  let mx = -1e4, my = -1e4;
+
+  const pick = () => { tx = rand(8, maxX()); ty = rand(TOP, maxY()); };
+  const render = () => { el.style.transform = `translate(${x}px, ${y}px) scaleX(${facing})`; };
+
+  // Freeze, then bolt away from the threat (or in a random direction).
+  const scare = (fx, fy) => {
+    if (scared > 0 || flee > 0) return;
+    const cxp = x + W() / 2, cyp = y + H() / 2;
+    const ax = fx == null ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(cxp - fx) || 1;
+    const ay = fy == null ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(cyp - fy) || 1;
+    tx = clamp(cxp + ax * rand(220, 420) - W() / 2, 8, maxX());
+    ty = clamp(cyp + ay * rand(80, 200) - H() / 2, TOP, maxY());
+    scared = 0.45; flee = 1.6; resting = 0;
+    el.classList.remove('scared'); void el.offsetWidth; el.classList.add('scared');
+  };
+
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
+  // Touch: a tap near the snail startles it; the stale point is cleared so it
+  // does not keep running from where the finger was.
+  window.addEventListener('touchstart', e => {
+    const t = e.touches[0]; mx = t.clientX; my = t.clientY;
+    setTimeout(() => { mx = my = -1e4; }, 250);
+  }, { passive: true });
+  // A hard scroll fling on touch devices also startles it.
+  let lastScroll = scrollY, lastScrollT = performance.now();
+  window.addEventListener('scroll', () => {
+    const now = performance.now(), v = Math.abs(scrollY - lastScroll) / Math.max(1, now - lastScrollT) * 1000;
+    lastScroll = scrollY; lastScrollT = now;
+    if (running && v > 2600 && window.matchMedia('(pointer: coarse)').matches) scare();
+  }, { passive: true });
+
+  const step = (now) => {
+    if (!running) return;
+    const dt = Math.min(0.1, (now - last) / 1000 || 0); last = now;
+
+    const cxp = x + W() / 2, cyp = y + H() / 2;
+    if (Math.hypot(mx - cxp, my - cyp) < Math.max(W(), H()) * 2.4) scare(mx, my);
+
+    if (scared > 0) scared -= dt;
+    else if (flee > 0) flee -= dt;
+    el.classList.toggle('flee', scared <= 0 && flee > 0);
+
+    if (scared > 0) {
+      el.classList.remove('moving');
+    } else if (resting > 0) {
+      resting -= dt;
+      if (resting <= 0) pick();
+      el.classList.remove('moving');
+    } else {
+      const dx = tx - x, dy = ty - y, d = Math.hypot(dx, dy);
+      const speed = flee > 0 ? 180 : 22;
+      if (d < 1.5) {
+        resting = rand(1.5, 5);
+      } else {
+        const s = Math.min(d, speed * dt);
+        x += dx / d * s; y += dy / d * s;
+        if (Math.abs(dx) > 2) facing = dx > 0 ? -1 : 1;
+        el.classList.add('moving');
+      }
+    }
+    render();
+    raf = requestAnimationFrame(step);
+  };
+
+  window.addEventListener('resize', () => {
+    x = clamp(x, 8, maxX()); y = clamp(y, TOP, maxY());
+    pick();
+    render();
+  });
+
+  const start = () => {
+    if (running) return;
+    running = true; last = 0;
+    render();
+    el.classList.add('awake');
+    raf = requestAnimationFrame(step);
+  };
+  const stop = () => {
+    running = false;
+    cancelAnimationFrame(raf);
+    el.classList.remove('awake', 'moving', 'flee', 'scared');
+  };
+  const setEnabled = (on) => {
+    on ? start() : stop();
+    toggle.textContent = on ? 'Snail: on' : 'Snail: off';
+    toggle.setAttribute('aria-pressed', String(on));
+    try { localStorage.setItem('snail', on ? 'on' : 'off'); } catch {}
+  };
+
+  let saved = null;
+  try { saved = localStorage.getItem('snail'); } catch {}
+  const enabled = saved ? saved === 'on' : !reduced;
+  toggle.addEventListener('click', () => setEnabled(!running));
+  setEnabled(enabled);
 }
 
 function initScrollSpy() {
