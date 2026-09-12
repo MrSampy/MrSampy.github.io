@@ -182,8 +182,10 @@ class OrganicBg extends HTMLElement {
       L.eyeDY = wide ? 0.85 : 0.42;
       L.blobS = (wide ? 0.67 : 0.40) * halfAt(0);
       L.seedR = wide ? halfW * 0.55 : halfW * 0.8;
+      // How far the scene sinks between the top and the bottom of the page.
+      L.driftY = halfH * (wide ? 0.30 : 0.26);
       const eyeX = wide ? Math.min(halfW * 0.5, 2.45) : halfW * 0.22;
-      const eyeY = wide ? halfH * 0.16 : -halfH * 0.42;
+      const eyeY = wide ? halfH * 0.14 : -halfH * 0.22;
       L.blobX = eyeX + L.eyeDX;
       L.baseY = eyeY - L.eyeDY;
     };
@@ -301,7 +303,10 @@ class OrganicBg extends HTMLElement {
 
       ptr.nx += (ptr.tx - ptr.nx) * 0.06;
       ptr.ny += (ptr.ty - ptr.ny) * 0.06;
-      scrollK += ((scrollPx / Math.max(1, innerHeight)) - scrollK) * 0.05;
+      // Progress through the document, not a count of viewports: on a page ten
+      // screens long the old measure walked the scene clean out of frame.
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+      scrollK += (Math.min(1, scrollPx / maxScroll) - scrollK) * 0.05;
 
       burstV *= 0.9;
       burst += burstV * dt * 12;
@@ -315,7 +320,7 @@ class OrganicBg extends HTMLElement {
       blob.rotation.x = -ptr.ny * 0.55 + scrollK * 0.12;
       blob.scale.setScalar(L.blobS);
       blob.position.x = L.blobX;
-      blob.position.y = L.baseY - ptr.ny * 0.22 - scrollK * 0.18;
+      blob.position.y = L.baseY - ptr.ny * 0.22 - scrollK * L.driftY;
       hit.position.copy(blob.position);
       hit.rotation.copy(blob.rotation);
       hit.scale.copy(blob.scale);
